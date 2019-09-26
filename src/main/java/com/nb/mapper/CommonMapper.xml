@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.nb.mapper.CommonMapper" >
+
+	<select id="getRtuMpIdByDeviceId" parameterType="string"
+		resultType="map">
+		select rtu_id rtuId,mp_id mpId from nb_water_meter
+		where device_id = #{deviceId,jdbcType=VARCHAR}
+	</select>
+
+	<select id="getCommand" parameterType="map" resultType="map">
+		select c.service_id serviceId,method,res_id
+		from nb_water_meter m
+		LEFT JOIN nb_command c
+		ON m.appinfo_id =c.appinfo_id and m.device_model_id = c.model_id
+		where m.rtu_id = #{rtuId,jdbcType=INTEGER} and mp_id = #{mpId,jdbcType=INTEGER} 
+		and c.command_id = #{commandId,jdbcType=INTEGER}
+	</select>
+
+  <resultMap id="DeviceInfo" type="com.nb.model.DeviceInfo">
+		<result column="imei" property="imei" jdbcType="VARCHAR" />
+		<result column="imsi" property="imsi" jdbcType="VARCHAR" />
+		<result column="deviceId" property="deviceId" jdbcType="VARCHAR" />
+		<result column="appId" property="appId" jdbcType="VARCHAR" />
+		<result column="secret" property="secret" jdbcType="VARCHAR" />
+		<result column="manufacturerId" property="manufacturerId" jdbcType="VARCHAR" />
+		<result column="manufacturerName" property="manufacturerName" jdbcType="VARCHAR" />
+		<result column="deviceType" property="deviceType" jdbcType="VARCHAR" />
+		<result column="model" property="model" jdbcType="VARCHAR" />
+		<result column="protocolType" property="protocolType" jdbcType="VARCHAR" />
+	</resultMap>
+
+
+	<select id="getDeviceInfo" parameterType="map" resultMap="DeviceInfo">
+		select m.imei_code imei,m.imsi_code imsi,m.device_id
+		deviceId,a.app_id appId,a.secret,
+		d.manufacturer_id manufacturerId,d.manufacturer_name manufacturerName,
+		d.device_type deviceType,d.model,d.protocol_type protocolType
+		from nb_water_meter m,nb_appinfo a ,nb_device_model d
+		where d.appinfo_id = a.id and m.appinfo_id = d.appinfo_id
+		and m.device_model_id = d.id
+		and rtu_id = #{rtuId,jdbcType=INTEGER} 
+		and mp_id =	#{mpId,jdbcType=INTEGER}
+	</select>
+	
+	<select id="getDeviceInfoByImei" parameterType="string" resultMap="DeviceInfo">
+		select m.imei_code imei,m.imsi_code imsi,m.device_id
+		deviceId,a.app_id appId,a.secret,
+		d.manufacturer_id manufacturerId,d.manufacturer_name manufacturerName,
+		d.device_type deviceType,d.model,d.protocol_type protocolType
+		from nb_water_meter m,nb_appinfo a ,nb_device_model d
+		where d.appinfo_id = a.id and m.appinfo_id = d.appinfo_id
+		and m.device_model_id = d.id
+		and m.imei = #{imei,jdbcType=INTEGER} 
+ 	</select>
+	
+	
+	
+	<select id="getDeviceKeyByIMEI" parameterType="map" resultType="map">
+		select default_key,backup_key,key_no from nb_water_meter
+		and imei_code = #{imei,jdbcType=VARCHAR} 
+ 	</select>
+	
+
+	<update id="updateDeviceIdByImei" parameterType="map">
+		update nb_water_meter
+		set device_id = #{deviceId,jdbcType=VARCHAR}
+		where imei_code = #{imei,jdbcType=VARCHAR}
+	</update>
+
+	<update id="updateWaterMeterValve" parameterType="map">
+		update nb_water_meter
+		<set>
+			<if test="valveState != null">
+				valve_status = #{valveState},
+			</if>
+			<if test="version != null">
+				firmware_version = #{version,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where rtu_id = #{rtuId,jdbcType=INTEGER}
+		and mp_id = #{mpId,jdbcType=INTEGER}
+	</update>
+	
+	
+	<update id="updateWaterMeter" parameterType="com.nb.model.NbWaterMeter" >
+    update nb_water_meter
+    <set >
+      <if test="appinfoId != null" >
+        appinfo_id = #{appinfoId,jdbcType=INTEGER},
+      </if>
+      <if test="deviceModelId != null" >
+        device_model_id = #{deviceModelId,jdbcType=INTEGER},
+      </if>
+      <if test="meterNumber != null" >
+        meter_number = #{meterNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="meterCaliber != null" >
+        meter_caliber = #{meterCaliber,jdbcType=INTEGER},
+      </if>
+      <if test="imeiCode != null" >
+        imei_code = #{imeiCode,jdbcType=VARCHAR},
+      </if>
+      <if test="imsiCode != null" >
+        imsi_code = #{imsiCode,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceId != null" >
+        device_id = #{deviceId,jdbcType=VARCHAR},
+      </if>
+      <if test="lowVoltageThreshold != null" >
+        low_voltage_threshold = #{lowVoltageThreshold,jdbcType=DECIMAL},
+      </if>
+      <if test="lowPressureThreshold != null" >
+        low_pressure_threshold = #{lowPressureThreshold,jdbcType=DECIMAL},
+      </if>
+      <if test="highPressureThreshold != null" >
+        high_pressure_threshold = #{highPressureThreshold,jdbcType=DECIMAL},
+      </if>
+      <if test="highVoltageThreshold != null" >
+        high_voltage_threshold = #{highVoltageThreshold,jdbcType=DECIMAL},
+      </if>
+      <if test="largeFlowThreshold != null" >
+        large_flow_threshold = #{largeFlowThreshold,jdbcType=DECIMAL},
+      </if>
+      <if test="largeFlowDuration != null" >
+        large_flow_duration = #{largeFlowDuration,jdbcType=INTEGER},
+      </if>
+      <if test="longTimeWaterUseThreshold != null" >
+        long_time_water_use_threshold = #{longTimeWaterUseThreshold,jdbcType=INTEGER},
+      </if>
+      <if test="smallFlowThreshold != null" >
+        small_flow_threshold = #{smallFlowThreshold,jdbcType=DECIMAL},
+      </if>
+      <if test="smallFlowDuration != null" >
+        small_flow_duration = #{smallFlowDuration,jdbcType=INTEGER},
+      </if>
+      <if test="onlineDelayWaitTime != null" >
+        online_delay_wait_time = #{onlineDelayWaitTime,jdbcType=INTEGER},
+      </if>
+      <if test="reportBaseTime != null" >
+        report_base_time = #{reportBaseTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="reportIntervalTime != null" >
+        report_interval_time = #{reportIntervalTime,jdbcType=INTEGER},
+      </if>
+      <if test="valveStatus != null" >
+        valve_status = #{valveStatus,jdbcType=TINYINT},
+      </if>
+      <if test="firmwareVersion != null" >
+        firmware_version = #{firmwareVersion,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where rtu_id = #{rtuId,jdbcType=INTEGER}
+      and mp_id = #{mpId,jdbcType=SMALLINT}
+  </update>
+	
+	
+ 
+</mapper>
