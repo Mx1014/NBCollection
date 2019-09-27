@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.nb.mapper.ke.NbWaterMeterMapper" >
+  <resultMap id="BaseResultMap" type="com.nb.model.ke.NbWaterMeter" >
+    <id column="rtu_id" property="rtuId" jdbcType="INTEGER" />
+    <id column="mp_id" property="mpId" jdbcType="SMALLINT" />
+    <result column="appinfo_id" property="appinfoId" jdbcType="INTEGER" />
+    <result column="device_model_id" property="deviceModelId" jdbcType="INTEGER" />
+    <result column="default_key" property="defaultKey" jdbcType="VARCHAR" />
+    <result column="backup_key" property="backupKey" jdbcType="VARCHAR" />
+    <result column="key_no" property="keyNo" jdbcType="INTEGER" />
+    <result column="meter_number" property="meterNumber" jdbcType="VARCHAR" />
+    <result column="meter_caliber" property="meterCaliber" jdbcType="INTEGER" />
+    <result column="imei_code" property="imeiCode" jdbcType="VARCHAR" />
+    <result column="imsi_code" property="imsiCode" jdbcType="VARCHAR" />
+    <result column="device_id" property="deviceId" jdbcType="VARCHAR" />
+    <result column="low_voltage_threshold" property="lowVoltageThreshold" jdbcType="DECIMAL" />
+    <result column="low_pressure_threshold" property="lowPressureThreshold" jdbcType="DECIMAL" />
+    <result column="high_pressure_threshold" property="highPressureThreshold" jdbcType="DECIMAL" />
+    <result column="high_voltage_threshold" property="highVoltageThreshold" jdbcType="DECIMAL" />
+    <result column="large_flow_threshold" property="largeFlowThreshold" jdbcType="DECIMAL" />
+    <result column="large_flow_duration" property="largeFlowDuration" jdbcType="INTEGER" />
+    <result column="long_time_water_use_threshold" property="longTimeWaterUseThreshold" jdbcType="INTEGER" />
+    <result column="small_flow_threshold" property="smallFlowThreshold" jdbcType="DECIMAL" />
+    <result column="small_flow_duration" property="smallFlowDuration" jdbcType="INTEGER" />
+    <result column="report_base_time" property="reportBaseTime" jdbcType="TIMESTAMP" />
+    <result column="report_interval_time" property="reportIntervalTime" jdbcType="INTEGER" />
+    <result column="valve_status" property="valveStatus" jdbcType="TINYINT" />
+    <result column="firmware_version" property="firmwareVersion" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    rtu_id, mp_id, appinfo_id, device_model_id, default_key, backup_key, key_no, meter_number, 
+    meter_caliber, imei_code, imsi_code, device_id, low_voltage_threshold, low_pressure_threshold, 
+    high_pressure_threshold, high_voltage_threshold, large_flow_threshold, large_flow_duration, 
+    long_time_water_use_threshold, small_flow_threshold, small_flow_duration, report_base_time, 
+    report_interval_time, valve_status, firmware_version
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="com.nb.model.ke.NbWaterMeterKey" >
+    select 
+    <include refid="Base_Column_List" />
+    from nb_water_meter
+    where rtu_id = #{rtuId,jdbcType=INTEGER}
+      and mp_id = #{mpId,jdbcType=SMALLINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="com.nb.model.ke.NbWaterMeterKey" >
+    delete from nb_water_meter
+    where rtu_id = #{rtuId,jdbcType=INTEGER}
+      and mp_id = #{mpId,jdbcType=SMALLINT}
+  </delete>
+  <insert id="insert" parameterType="com.nb.model.ke.NbWaterMeter" >
+    insert into nb_water_meter (rtu_id, mp_id, appinfo_id, 
+      device_model_id, default_key, backup_key, 
+      key_no, meter_number, meter_caliber, 
+      imei_code, imsi_code, device_id, 
+      low_voltage_threshold, low_pressure_threshold, 
+      high_pressure_threshold, high_voltage_threshold, 
+      large_flow_threshold, large_flow_duration, 
+      long_time_water_use_threshold, small_flow_threshold, 
+      small_flow_duration, report_base_time, report_interval_time, 
+      valve_status, firmware_version)
+    values (#{rtuId,jdbcType=INTEGER}, #{mpId,jdbcType=SMALLINT}, #{appinfoId,jdbcType=INTEGER}, 
+      #{deviceModelId,jdbcType=INTEGER}, #{defaultKey,jdbcType=VARCHAR}, #{backupKey,jdbcType=VARCHAR}, 
+      #{keyNo,jdbcType=INTEGER}, #{meterNumber,jdbcType=VARCHAR}, #{meterCaliber,jdbcType=INTEGER}, 
+      #{imeiCode,jdbcType=VARCHAR}, #{imsiCode,jdbcType=VARCHAR}, #{deviceId,jdbcType=VARCHAR}, 
+      #{lowVoltageThreshold,jdbcType=DECIMAL}, #{lowPressureThreshold,jdbcType=DECIMAL}, 
+      #{highPressureThreshold,jdbcType=DECIMAL}, #{highVoltageThreshold,jdbcType=DECIMAL}, 
+      #{largeFlowThreshold,jdbcType=DECIMAL}, #{largeFlowDuration,jdbcType=INTEGER}, 
+      #{longTimeWaterUseThreshold,jdbcType=INTEGER}, #{smallFlowThreshold,jdbcType=DECIMAL}, 
+      #{smallFlowDuration,jdbcType=INTEGER}, #{reportBaseTime,jdbcType=TIMESTAMP}, #{reportIntervalTime,jdbcType=INTEGER}, 
+      #{valveStatus,jdbcType=TINYINT}, #{firmwareVersion,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.nb.model.ke.NbWaterMeter" >
+    insert into nb_water_meter
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="rtuId != null" >
+        rtu_id,
+      </if>
+      <if test="mpId != null" >
+        mp_id,
+      </if>
+      <if test="appinfoId != null" >
+        appinfo_id,
+      </if>
+      <if test="deviceModelId != null" >
+        device_model_id,
+      </if>
+      <if test="defaultKey != null" >
+        default_key,
+      </if>
+      <if test="backupKey != null" >
+        backup_key,
+      </if>
+      <if test="keyNo != null" >
+        key_no,
+      </if>
+      <if test="meterNumber != null" >
+        meter_number,
+      </if>
+      <if test="meterCaliber != null" >
+        meter_caliber,
+      </if>
+      <if test="imeiCode != null" >
+        imei_code,
+      </if>
+      <if test="imsiCode != null" >
+        imsi_code,
+      </if>
+      <if test="deviceId != null" >
+        device_id,
+      </if>
+      <if test="lowVoltageThreshold != null" >
+        low_voltage_threshold,
+      </if>
+      <if test="lowPressureThreshold != null" >
+        low_pressure_threshold,
+      </if>
+      <if test="highPressureThreshold != null" >
+        high_pressure_threshold,
+      </if>
+      <if test="highVoltageThreshold != null" >
+        high_voltage_threshold,
+      </if>
+      <if test="largeFlowThreshold != null" >
+        large_flow_threshold,
+      </if>
+      <if test="largeFlowDuration != null" >
+        large_flow_duration,
+      </if>
+      <if test="longTimeWaterUseThreshold != null" >
+        long_time_water_use_threshold,
+      </if>
+      <if test="smallFlowThreshold != null" >
+        small_flow_threshold,
+      </if>
+      <if test="smallFlowDuration != null" >
+        small_flow_duration,
+      </if>
+      <if test="reportBaseTime != null" >
+        report_base_time,
+      </if>
+      <if test="reportIntervalTime != null" >
+        report_interval_time,
+      </if>
+      <if test="valveStatus != null" >
+        valve_status,
+      </if>
+      <if test="firmwareVersion != null" >
+        firmware_version,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="rtuId != null" >
+        #{rtuId,jdbcType=INTEGER},
+      </if>
+      <if test="mpId != null" >
+        #{mpId,jdbcType=SMALLINT},
+      </if>
+      <if test="appinfoId != null" >
+        #{appinfoId,jdbcType=INTEGER},
+      </if>
+      <if test="deviceModelId != null" >
+        #{deviceModelId,jdbcType=INTEGER},
+      </if>
+      <if test="defaultKey != null" >
+        #{defaultKey,jdbcType=VARCHAR},
+      </if>
+      <if test="backupKey != null" >
+        #{backupKey,jdbcType=VARCHAR},
+      </if>
+      <if test="keyNo != null" >
+        #{keyNo,jdbcType=INTEGER},
+      </if>
+      <if test="meterNumber != null" >
+        #{meterNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="meterCaliber != null" >
+        #{meterCaliber,jdbcType=INTEGER},
+      </if>
+      <if test="imeiCode != null" >
+        #{imeiCode,jdbcType=VARCHAR},
+      </if>
+      <if test="imsiCode != null" >
+        #{imsiCode,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceId != null" >
+        #{deviceId,jdbcType=VARCHAR},
+      </if>
+      <if test="lowVoltageThreshold != null" >
+        #{lowVoltageThreshold,jdbcType=DECIMAL},
+      </if>
+      <if test="lowPressureThreshold != null" >
+        #{lowPressureThreshold,jdbcType=DECIMAL},
+      </if>
+      <if test="highPressureThreshold != null" >
+        #{highPressureThreshold,jdbcType=DECIMAL},
+      </if>
+      <if test="highVoltageThreshold != null" >
+        #{highVoltageThreshold,jdbcType=DECIMAL},
+      </if>
+      <if test="largeFlowThreshold != null" >
+        #{largeFlowThreshold,jdbcType=DECIMAL},
+      </if>
+      <if test="largeFlowDuration != null" >
+        #{largeFlowDuration,jdbcType=INTEGER},
+      </if>
+      <if test="longTimeWaterUseThreshold != null" >
+        #{longTimeWaterUseThreshold,jdbcType=INTEGER},
+      </if>
+      <if test="smallFlowThreshold != null" >
+        #{smallFlowThreshold,jdbcType=DECIMAL},
+      </if>
+      <if test="smallFlowDuration != null" >
+        #{smallFlowDuration,jdbcType=INTEGER},
+      </if>
+      <if test="reportBaseTime != null" >
+        #{reportBaseTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="reportIntervalTime != null" >
+        #{reportIntervalTime,jdbcType=INTEGER},
+      </if>
+      <if test="valveStatus != null" >
+        #{valveStatus,jdbcType=TINYINT},
+      </if>
+      <if test="firmwareVersion != null" >
+        #{firmwareVersion,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.nb.model.ke.NbWaterMeter" >
+    update nb_water_meter
+    <set >
+      <if test="appinfoId != null" >
+        appinfo_id = #{appinfoId,jdbcType=INTEGER},
+      </if>
+      <if test="deviceModelId != null" >
+        device_model_id = #{deviceModelId,jdbcType=INTEGER},
+      </if>
+      <if test="defaultKey != null" >
+        default_key = #{defaultKey,jdbcType=VARCHAR},
+      </if>
+      <if test="backupKey != null" >
+        backup_key = #{backupKey,jdbcType=VARCHAR},
+      </if>
+      <if test="keyNo != null" >
+        key_no = #{keyNo,jdbcType=INTEGER},
+      </if>
+      <if test="meterNumber != null" >
+        meter_number = #{meterNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="meterCaliber != null" >
+        meter_caliber = #{meterCaliber,jdbcType=INTEGER},
+      </if>
+      <if test="imeiCode != null" >
+        imei_code = #{imeiCode,jdbcType=VARCHAR},
+      </if>
+      <if test="imsiCode != null" >
+        imsi_code = #{imsiCode,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceId != null" >
+        device_id = #{deviceId,jdbcType=VARCHAR},
+      </if>
+      <if test="lowVoltageThreshold != null" >
+        low_voltage_threshold = #{lowVoltageThreshold,jdbcType=DECIMAL},
+      </if>
+      <if test="lowPressureThreshold != null" >
+        low_pressure_threshold = #{lowPressureThreshold,jdbcType=DECIMAL},
+      </if>
+      <if test="highPressureThreshold != null" >
+        high_pressure_threshold = #{highPressureThreshold,jdbcType=DECIMAL},
+      </if>
+      <if test="highVoltageThreshold != null" >
+        high_voltage_threshold = #{highVoltageThreshold,jdbcType=DECIMAL},
+      </if>
+      <if test="largeFlowThreshold != null" >
+        large_flow_threshold = #{largeFlowThreshold,jdbcType=DECIMAL},
+      </if>
+      <if test="largeFlowDuration != null" >
+        large_flow_duration = #{largeFlowDuration,jdbcType=INTEGER},
+      </if>
+      <if test="longTimeWaterUseThreshold != null" >
+        long_time_water_use_threshold = #{longTimeWaterUseThreshold,jdbcType=INTEGER},
+      </if>
+      <if test="smallFlowThreshold != null" >
+        small_flow_threshold = #{smallFlowThreshold,jdbcType=DECIMAL},
+      </if>
+      <if test="smallFlowDuration != null" >
+        small_flow_duration = #{smallFlowDuration,jdbcType=INTEGER},
+      </if>
+      <if test="reportBaseTime != null" >
+        report_base_time = #{reportBaseTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="reportIntervalTime != null" >
+        report_interval_time = #{reportIntervalTime,jdbcType=INTEGER},
+      </if>
+      <if test="valveStatus != null" >
+        valve_status = #{valveStatus,jdbcType=TINYINT},
+      </if>
+      <if test="firmwareVersion != null" >
+        firmware_version = #{firmwareVersion,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where rtu_id = #{rtuId,jdbcType=INTEGER}
+      and mp_id = #{mpId,jdbcType=SMALLINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.nb.model.ke.NbWaterMeter" >
+    update nb_water_meter
+    set appinfo_id = #{appinfoId,jdbcType=INTEGER},
+      device_model_id = #{deviceModelId,jdbcType=INTEGER},
+      default_key = #{defaultKey,jdbcType=VARCHAR},
+      backup_key = #{backupKey,jdbcType=VARCHAR},
+      key_no = #{keyNo,jdbcType=INTEGER},
+      meter_number = #{meterNumber,jdbcType=VARCHAR},
+      meter_caliber = #{meterCaliber,jdbcType=INTEGER},
+      imei_code = #{imeiCode,jdbcType=VARCHAR},
+      imsi_code = #{imsiCode,jdbcType=VARCHAR},
+      device_id = #{deviceId,jdbcType=VARCHAR},
+      low_voltage_threshold = #{lowVoltageThreshold,jdbcType=DECIMAL},
+      low_pressure_threshold = #{lowPressureThreshold,jdbcType=DECIMAL},
+      high_pressure_threshold = #{highPressureThreshold,jdbcType=DECIMAL},
+      high_voltage_threshold = #{highVoltageThreshold,jdbcType=DECIMAL},
+      large_flow_threshold = #{largeFlowThreshold,jdbcType=DECIMAL},
+      large_flow_duration = #{largeFlowDuration,jdbcType=INTEGER},
+      long_time_water_use_threshold = #{longTimeWaterUseThreshold,jdbcType=INTEGER},
+      small_flow_threshold = #{smallFlowThreshold,jdbcType=DECIMAL},
+      small_flow_duration = #{smallFlowDuration,jdbcType=INTEGER},
+      report_base_time = #{reportBaseTime,jdbcType=TIMESTAMP},
+      report_interval_time = #{reportIntervalTime,jdbcType=INTEGER},
+      valve_status = #{valveStatus,jdbcType=TINYINT},
+      firmware_version = #{firmwareVersion,jdbcType=VARCHAR}
+    where rtu_id = #{rtuId,jdbcType=INTEGER}
+      and mp_id = #{mpId,jdbcType=SMALLINT}
+  </update>
+</mapper>
