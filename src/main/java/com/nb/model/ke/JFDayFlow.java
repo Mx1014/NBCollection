@@ -1,4 +1,4 @@
-package com.nb.model;
+package com.nb.model.ke;
 
 import java.io.Serializable;
 
