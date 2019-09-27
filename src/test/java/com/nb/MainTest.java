@@ -10,6 +10,7 @@ package com.nb;
 
 
 import static com.nb.utils.ConverterUtils.toLong;
+import static com.nb.utils.ConverterUtils.toStr;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteOrder;
@@ -81,10 +82,13 @@ public class MainTest {
 	* @throws 
 	*/
 	public static void main(String[] args) throws UnsupportedEncodingException {
+		
+		 System.out.println(toStr(toLong("0869029032410846")));;
+
 //		byte[] c = BytesUtils.hexStringToBytes("c0af");
 //		System.out.println(BytesUtils.bytesToHex(c));
-		byte[] lenght = BytesUtils.getBytes((short)434);
-				System.out.println(lenght.length);
+//		byte[] lenght = BytesUtils.getBytes((short)434);
+//				System.out.println(lenght.length);
 				
 //		System.out.println(BytesUtils.str2Bcd("0869029032410846").length);
 //

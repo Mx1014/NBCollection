@@ -56,8 +56,8 @@
 	
 	
 	
-	<select id="getDeviceKeyByIMEI" parameterType="map" resultType="map">
-		select default_key,backup_key,key_no from nb_water_meter
+	<select id="getNbWaterByIMEI" parameterType="map" resultType="map">
+		select * from nb_water_meter
 		and imei_code = #{imei,jdbcType=VARCHAR} 
  	</select>
 	

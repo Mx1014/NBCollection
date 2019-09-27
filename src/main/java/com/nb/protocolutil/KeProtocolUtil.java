@@ -43,7 +43,6 @@ import com.nb.utils.JedisUtils;
 import com.nb.utils.NumberUtils;
 import com.nb.utils.SM4Utils;
 
-
 /**
  * @ClassName: KeProtocolUtil
  * @Description: 科林NB水表规约解析工具类
@@ -63,16 +62,12 @@ public class KeProtocolUtil {
 		keProtocolUtil = this;
 		keProtocolUtil.commonMapper = this.commonMapper;
 	}
-	
-	/** 
-	* 解析上报数据帧
-	* @Title: parseDataFrame 
-	* @param @param msgJson
-	* @param @return
-	* @param @throws Exception    设定文件 
-	* @return JSONObject    返回类型 
-	* @throws 
-	*/
+
+	/**
+	 * 解析上报数据帧 @Title: parseDataFrame @param @param
+	 * msgJson @param @return @param @throws Exception 设定文件 @return JSONObject
+	 * 返回类型 @throws
+	 */
 	public static JSONObject parseDataFrame(byte[] dataFrame) throws Exception {
 		/** 验证接收到的消息，并返回数据部分 */
 		KeMsg keMsg = verifyDataFrame(dataFrame);
@@ -125,23 +120,20 @@ public class KeProtocolUtil {
 		}
 		return dataJson;
 	}
-	
-	 
-	/** 
-	* (这里用一句话描述这个方法的作用) 
-	* @Title: parseC0A0 
-	* @param @param keMsg
-	* @param @return    设定文件 
-	* @return JSONObject    返回类型 
-	* @throws 
-	*/
+
+	/**
+	 * (这里用一句话描述这个方法的作用) @Title: parseC0A0 @param @param keMsg @param @return
+	 * 设定文件 @return JSONObject 返回类型 @throws
+	 */
 	private static JSONObject parseC0A0(KeMsg keMsg) {
 		JSONObject rtnJson = new JSONObject();
 		String imei = String.format("%016d", toLong(keMsg.getImei()));
+
 		String secretKey = JedisUtils.get(imei);
 		SM4Utils sm4 = new SM4Utils();
 		sm4.secretKey = secretKey;
 		sm4.hexString = false;
+
 		/** 解密数据域 */
 		byte[] data = sm4.decryptDataECB(keMsg.getData());
 		if (null == data) {
@@ -158,27 +150,27 @@ public class KeProtocolUtil {
 			/** 日冻结表底 */
 			byte[] data1 = new byte[Constant.FOUR];
 			dis.read(data1);
-			String freezeData = NumberUtils.formatNumber(getDouble(invertArray(data1)), Constant.THREE);
+			double totalFlow = getDouble(invertArray(data1)) / Constant.NUM_1000;
 
 			/** 当前正向累计流量 */
 			byte[] data2 = new byte[Constant.FOUR];
 			dis.read(data2);
-			String currentPositiveCumulative = NumberUtils.formatNumber(getDouble(invertArray(data2)), Constant.THREE);
+			double totalPositiveFlow = getDouble(invertArray(data2)) / Constant.NUM_1000;
 
 			/** 当前反向累计流量 */
 			byte[] data3 = new byte[Constant.FOUR];
 			dis.read(data3);
-			String currentReverseCumulative = NumberUtils.formatNumber(getDouble(invertArray(data3)), Constant.THREE);
+			double totalNegativeFlow = getDouble(invertArray(data3)) / Constant.NUM_1000;
 
 			/** 冻结前一日正向累计流量 */
 			byte[] data4 = new byte[Constant.FOUR];
 			dis.read(data4);
-			String positiveCumulative = NumberUtils.formatNumber(getDouble(invertArray(data4)), Constant.THREE);
+			double dailyPositiveFlow = getDouble(invertArray(data4)) / Constant.NUM_1000;
 
 			/** 冻结前一日反向累计流量 */
 			byte[] data5 = new byte[Constant.FOUR];
 			dis.read(data5);
-			String reverseCumulative = NumberUtils.formatNumber(getDouble(invertArray(data5)), Constant.THREE);
+			double dailyNegativeFlow = getDouble(invertArray(data5)) / Constant.NUM_1000;
 
 			/** 冻结前一日瞬时量 */
 			byte[] data6 = new byte[Constant.NUM_96];
@@ -195,7 +187,7 @@ public class KeProtocolUtil {
 			/** 电池电压 */
 			byte[] data9 = new byte[Constant.ONE];
 			dis.read(data9);
-			String batteryVoltage = NumberUtils.formatNumber(getDouble(data9), Constant.ONE);
+			double batteryVoltage = getDouble(data9) / Constant.TEN;
 
 			/** 版本号 */
 			byte[] data10 = new byte[Constant.FIVE];
@@ -203,17 +195,17 @@ public class KeProtocolUtil {
 			String version = hexToAscii(bytesToHex(data10));
 
 			/** 阀门状态 */
-			byte data11 = dis.readByte();
+			byte valveStatus = dis.readByte();
 
 			/** 前一日最大流速 */
 			byte[] data12 = new byte[Constant.TWO];
 			dis.read(data12);
-			String maxVelocity = NumberUtils.formatNumber(getDouble(invertArray(data12)), Constant.THREE);
+			double dailyMaxVelocity = getDouble(invertArray(data12)) / Constant.NUM_1000;
 
 			/** 前一日最大流速发生时间 */
 			byte[] data13 = new byte[Constant.SIX];
 			dis.read(data13);
-			String maxVelocityTime = BytesUtils.bcdToString(data13);
+			String dailyMaxVelocityTime = BytesUtils.bcdToString(data13);
 
 			/** 上报基准时间 */
 			byte[] data14 = new byte[Constant.SIX];
@@ -233,7 +225,7 @@ public class KeProtocolUtil {
 			/** 小流量告警阀值 */
 			byte[] data18 = new byte[Constant.TWO];
 			dis.read(data18);
-			String smallFlowAlarmThreshold = NumberUtils.formatNumber(getDouble(invertArray(data12)), Constant.ONE);
+			double smallFlowAlarmThreshold = getDouble(invertArray(data12)) / Constant.TEN;
 			/** 小流量告警持续时间 */
 			byte smallFlowAlarmThresholdTime = dis.readByte();
 			/** 长时间用水阀值 */
@@ -242,7 +234,7 @@ public class KeProtocolUtil {
 			/** 电池低电压告警阀值 */
 			byte[] data21 = new byte[Constant.ONE];
 			dis.read(data21);
-			String lowVoltageAlarmThreshold = NumberUtils.formatNumber(getDouble(data21), Constant.ONE);
+			double lowVoltageAlarmThreshold = getDouble(data21) / Constant.TEN;
 			/** 高压告警阀值 */
 			byte data22 = dis.readByte();
 			/** 低压告警阀值 */
@@ -276,29 +268,28 @@ public class KeProtocolUtil {
 				LoggerUtil.logger(LogName.ERROR).error("设备{}imei不匹配，直接丢掉", imei);
 				return null;
 			}
-			
-			/** 存库操作 nb_daily_data_200808 nb_instantaneous_200808 JFDayFlow200808 */
-			
-			
 
-			rtnJson.put("control", "C0A0");
+			/** 存库操作 nb_daily_data_200808 nb_instantaneous_200808 */
+			
+ 			rtnJson.put("control", "C0A0");
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
 		}
-		
-		
+
 		return rtnJson;
 	}
 
-	/** 
-	* 解析设备请求更新密钥，剩下新密钥后存入redis，然后下发直接命令下发40AF
-	* @Title: parseC0AF 
-	* @param @param keMsg
-	* @param @return    设定文件 
-	* @return JSONObject    返回类型 
-	* @throws 
-	*/
+	private void saveDailyData(String freezeDate, double totalFlow, double totalPositiveFlow, double totalNegativeFlow,
+			double dailyPositiveFlow, double dailyNegativeFlow, double dailyMaxVelocity, String dailyMaxVelocityTime,
+			double batteryVoltage, String valveStatus) {
+
+	}
+
+	/**
+	 * 解析设备请求更新密钥，剩下新密钥后存入redis，然后下发直接命令下发40AF @Title: parseC0AF @param @param
+	 * keMsg @param @return 设定文件 @return JSONObject 返回类型 @throws
+	 */
 	private static JSONObject parseC0AF(KeMsg keMsg) {
 		JSONObject rtnJson = new JSONObject();
 		String defaultKey = String.format("%016d", toLong(keMsg.getImei()));
@@ -313,7 +304,7 @@ public class KeProtocolUtil {
 		}
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		DataInputStream dis = new DataInputStream(bais);
-		
+
 		try {
 			/** imei码 */
 			byte[] imeiBytes = new byte[Constant.EIGHT];
@@ -345,23 +336,19 @@ public class KeProtocolUtil {
 				LoggerUtil.logger(LogName.ERROR).error("设备{}imei或者默认密钥不匹配，直接丢掉", imei);
 				return null;
 			}
-		
+
 			rtnJson.put("control", "C0AF");
 		} catch (IOException e) {
- 			e.printStackTrace();
- 			return null;
+			e.printStackTrace();
+			return null;
 		}
 		return rtnJson;
 	}
-	
-	/** 
-	* 组建40AF帧 
-	* @Title: make40AFFrame 
-	* @param @param imei
-	* @param @return    设定文件 
-	* @return String    返回类型 
-	* @throws 
-	*/
+
+	/**
+	 * 组建40AF帧 @Title: make40AFFrame @param @param imei @param @return 设定文件 @return
+	 * String 返回类型 @throws
+	 */
 	public static String make40AFFrame(String imei) {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(bos);
@@ -377,9 +364,9 @@ public class KeProtocolUtil {
 			/** imei */
 			byte[] imeiBcd = BytesUtils.str2Bcd(imei);
 			dos.write(imeiBcd);
-			/**控制码*/
+			/** 控制码 */
 			dos.writeShort(0x40AF);
-			
+
 			ByteArrayOutputStream dataBos = new ByteArrayOutputStream();
 			DataOutputStream dataDos = new DataOutputStream(dataBos);
 			/** 处理结果 */
@@ -414,23 +401,17 @@ public class KeProtocolUtil {
 			dataFrame = BytesUtils.bytesToHex(bos.toByteArray());
 			/** 将新密钥存入redis */
 			JedisUtils.set(imei, secretKey);
-			
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return dataFrame;
 	}
-	
-	
-	/** 
-	* 验证消息，并返回数据部分
-	* @Title: verifyDataFrames 
-	* @param @param msg
-	* @param @return
-	* @param @throws Exception    设定文件 
-	* @return KeMsg    返回类型 
-	* @throws 
-	*/
+
+	/**
+	 * 验证消息，并返回数据部分 @Title: verifyDataFrames @param @param
+	 * msg @param @return @param @throws Exception 设定文件 @return KeMsg 返回类型 @throws
+	 */
 	private static KeMsg verifyDataFrame(byte[] msg) {
 
 		ByteArrayInputStream bais = new ByteArrayInputStream(msg);
@@ -443,7 +424,7 @@ public class KeProtocolUtil {
 				System.out.println("起始字符错误");
 				return null;
 			}
-			
+
 			/** 规约类型 */
 			byte protocolType = dis.readByte();
 			if (protocolType != 0x20) {
