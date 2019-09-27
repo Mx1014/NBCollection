@@ -44,7 +44,7 @@ create table nb_instantaneous_200808
 		ymd						int				not null,				/*数据日期*/
 		hms						int				not null,				/*数据时间*/
 
-		total_flow 					DECIMAL(10,3) null,			/*累计流量*/
+		total_flow 					DECIMAL(10,3) null,	/*累计流量*/
 	
 		CONSTRAINT pk_nb_instantaneous_200808 PRIMARY KEY (rtu_id,mp_id,ymd,hms)				
 )

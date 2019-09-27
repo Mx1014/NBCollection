@@ -220,27 +220,49 @@ public class KeProtocolUtil {
 			dis.read(data14);
 			String reportBaseTime = BytesUtils.bcdToString(data14);
 
-			/** 上报时间间隔 0-25 单位小时*/
+			/** 上报时间间隔 0-25 单位小时 */
 			byte data15 = dis.readByte();
-			
-			/** 前一日最大流速发生时间 */
-			byte[] data13 = new byte[Constant.SIX];
-			dis.read(data13);
-			
-			
-			
+
+			/** 大流量告警阀值 */
+			byte[] data16 = new byte[Constant.TWO];
+			dis.read(data16);
+			short largeFlowAlarmThreshold = getShort(invertArray(data16));
+			/** 大流量告警持续时间 */
+			byte largeFlowAlarmThresholdTime = dis.readByte();
+
+			/** 小流量告警阀值 */
+			byte[] data18 = new byte[Constant.TWO];
+			dis.read(data18);
+			String smallFlowAlarmThreshold = NumberUtils.formatNumber(getDouble(invertArray(data12)), Constant.ONE);
+			/** 小流量告警持续时间 */
+			byte smallFlowAlarmThresholdTime = dis.readByte();
+			/** 长时间用水阀值 */
+			byte longTimeUseWaterThresholdTime = dis.readByte();
+
+			/** 电池低电压告警阀值 */
+			byte[] data21 = new byte[Constant.ONE];
+			dis.read(data21);
+			String lowVoltageAlarmThreshold = NumberUtils.formatNumber(getDouble(data21), Constant.ONE);
+			/** 高压告警阀值 */
+			byte data22 = dis.readByte();
+			/** 低压告警阀值 */
+			byte data23 = dis.readByte();
+
 			/** 备用字节 */
-			byte[] back = new byte[Constant.TEN];
-			dis.read(back);
-			
-			
-			
+			byte[] data24 = new byte[Constant.TEN];
+			dis.read(data24);
+
+			/** imei码 */
+			byte[] imeiBytes = new byte[Constant.EIGHT];
+			dis.read(imeiBytes);
+			String imeiCode = BytesUtils.bcdToString(imeiBytes);
+
 			/** 校验字节 */
 			byte[] crc = new byte[Constant.TWO];
 			dis.read(crc);
 
 			/** 获取待验证数据，并计算CRC值 */
-			byte[] crcData = new byte[Constant.NUM_34];
+			byte[] crcData = new byte[Constant.NUM_188];
 			System.arraycopy(data, Constant.ZERO, crcData, Constant.ZERO, crcData.length);
 			String calcCrc = getReserveCrc(crcData);
 
@@ -250,19 +272,23 @@ public class KeProtocolUtil {
 				return null;
 			}
 
-			if (!imei.equals(keMsg.getImei())) {
-				LoggerUtil.logger(LogName.ERROR).error("设备{}imei或者默认密钥不匹配，直接丢掉", imei);
+			if (!imeiCode.equals(keMsg.getImei())) {
+				LoggerUtil.logger(LogName.ERROR).error("设备{}imei不匹配，直接丢掉", imei);
 				return null;
 			}
-		
+			
+			/** 存库操作 nb_daily_data_200808 nb_instantaneous_200808 JFDayFlow200808 */
+			
+			
+
 			rtnJson.put("control", "C0A0");
 		} catch (IOException e) {
- 			e.printStackTrace();
- 			return null;
+			e.printStackTrace();
+			return null;
 		}
 		
 		
-		return null;
+		return rtnJson;
 	}
 
 	/** 

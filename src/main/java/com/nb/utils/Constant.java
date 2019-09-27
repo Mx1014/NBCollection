@@ -297,6 +297,7 @@ public class Constant {
 
 	/** 中国联通服务前缀 */
 	public static String CHINA_UNICOM_COMMAND = "chinaUnicomCommand";
+	public static int NUM_188 = 188;
 
 	/** 运营商类型 */
 	public static final int CHINA_MOBILE = 0;
