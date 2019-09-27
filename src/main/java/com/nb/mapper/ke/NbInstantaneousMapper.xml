@@ -11,30 +11,25 @@
   <sql id="Base_Column_List" >
     rtu_id, mp_id, ymd, hms, total_flow
   </sql>
-  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="com.nb.model.ke.NbInstantaneousKey" >
+  <select id="getNbInstantaneous" resultMap="BaseResultMap" parameterType="com.nb.model.ke.NbInstantaneous" >
     select 
     <include refid="Base_Column_List" />
-    from nb_instantaneous_200808
+    from ${tableName}
     where rtu_id = #{rtuId,jdbcType=INTEGER}
       and mp_id = #{mpId,jdbcType=SMALLINT}
       and ymd = #{ymd,jdbcType=INTEGER}
       and hms = #{hms,jdbcType=INTEGER}
   </select>
-  <delete id="deleteByPrimaryKey" parameterType="com.nb.model.ke.NbInstantaneousKey" >
-    delete from nb_instantaneous_200808
+  <delete id="deleteNbInstantaneous" parameterType="com.nb.model.ke.NbInstantaneous" >
+    delete from ${tableName}
     where rtu_id = #{rtuId,jdbcType=INTEGER}
       and mp_id = #{mpId,jdbcType=SMALLINT}
       and ymd = #{ymd,jdbcType=INTEGER}
       and hms = #{hms,jdbcType=INTEGER}
   </delete>
-  <insert id="insert" parameterType="com.nb.model.ke.NbInstantaneous" >
-    insert into nb_instantaneous_200808 (rtu_id, mp_id, ymd, 
-      hms, total_flow)
-    values (#{rtuId,jdbcType=INTEGER}, #{mpId,jdbcType=SMALLINT}, #{ymd,jdbcType=INTEGER}, 
-      #{hms,jdbcType=INTEGER}, #{totalFlow,jdbcType=DECIMAL})
-  </insert>
-  <insert id="insertSelective" parameterType="com.nb.model.ke.NbInstantaneous" >
-    insert into nb_instantaneous_200808
+   
+  <insert id="insertNbInstantaneous" parameterType="com.nb.model.ke.NbInstantaneous" >
+    insert into ${tableName}
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="rtuId != null" >
         rtu_id,
@@ -70,8 +65,8 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.nb.model.ke.NbInstantaneous" >
-    update nb_instantaneous_200808
+  <update id="updateNbInstantaneous" parameterType="com.nb.model.ke.NbInstantaneous" >
+    update ${tableName}
     <set >
       <if test="totalFlow != null" >
         total_flow = #{totalFlow,jdbcType=DECIMAL},
@@ -82,12 +77,5 @@
       and ymd = #{ymd,jdbcType=INTEGER}
       and hms = #{hms,jdbcType=INTEGER}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.nb.model.ke.NbInstantaneous" >
-    update nb_instantaneous_200808
-    set total_flow = #{totalFlow,jdbcType=DECIMAL}
-    where rtu_id = #{rtuId,jdbcType=INTEGER}
-      and mp_id = #{mpId,jdbcType=SMALLINT}
-      and ymd = #{ymd,jdbcType=INTEGER}
-      and hms = #{hms,jdbcType=INTEGER}
-  </update>
+  
 </mapper>

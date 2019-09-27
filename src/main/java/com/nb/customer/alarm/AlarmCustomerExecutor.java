@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.nb.logger.LogName;
 import com.nb.logger.LoggerUtil;
-import com.nb.mapper.EveMapper;
+import com.nb.mapper.ke.EveMapper;
 import com.nb.model.Eve;
 import com.nb.utils.Constant;
 import com.nb.utils.JedisUtils;

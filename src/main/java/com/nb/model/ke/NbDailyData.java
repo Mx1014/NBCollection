@@ -1,96 +1,156 @@
 package com.nb.model.ke;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 
-public class NbDailyData extends NbDailyDataKey {
-    private BigDecimal totalFlow;
+public class NbDailyData implements Serializable {
+	  
+	private static final long serialVersionUID = 3983469343600931028L;
 
-    private BigDecimal totalPositiveFlow;
+	private Integer rtuId;
 
-    private BigDecimal totalNegativeFlow;
+	private Short mpId;
 
-    private BigDecimal dailyPositiveFlow;
+	private Integer ymd;
 
-    private BigDecimal dailyNegativeFlow;
+	private Integer hms;
 
-    private BigDecimal dailyMaxVelocity;
+	private BigDecimal totalFlow;
 
-    private Date dailyMaxVelocityTime;
+	private BigDecimal totalPositiveFlow;
 
-    private BigDecimal batteryVoltage;
+	private BigDecimal totalNegativeFlow;
 
-    private Byte valveStatus;
+	private BigDecimal dailyPositiveFlow;
 
-    public BigDecimal getTotalFlow() {
-        return totalFlow;
-    }
+	private BigDecimal dailyNegativeFlow;
 
-    public void setTotalFlow(BigDecimal totalFlow) {
-        this.totalFlow = totalFlow;
-    }
+	private BigDecimal dailyMaxVelocity;
 
-    public BigDecimal getTotalPositiveFlow() {
-        return totalPositiveFlow;
-    }
+	private Date dailyMaxVelocityTime;
 
-    public void setTotalPositiveFlow(BigDecimal totalPositiveFlow) {
-        this.totalPositiveFlow = totalPositiveFlow;
-    }
+	private BigDecimal batteryVoltage;
 
-    public BigDecimal getTotalNegativeFlow() {
-        return totalNegativeFlow;
-    }
+	private Byte valveStatus;
+	
+	private String tableName;
+	
+	 /**
+	 * @return the tableName
+	 */
+	public String getTableName() {
+		return tableName;
+	}
 
-    public void setTotalNegativeFlow(BigDecimal totalNegativeFlow) {
-        this.totalNegativeFlow = totalNegativeFlow;
-    }
+	/**
+	 * @param tableName the tableName to set
+	 */
+	public void setTableName(String tableName) {
+		this.tableName = "yddata.dbo.nb_daily_data_" + tableName;
+	}
 
-    public BigDecimal getDailyPositiveFlow() {
-        return dailyPositiveFlow;
-    }
+	public Integer getRtuId() {
+	        return rtuId;
+	    }
 
-    public void setDailyPositiveFlow(BigDecimal dailyPositiveFlow) {
-        this.dailyPositiveFlow = dailyPositiveFlow;
-    }
+	    public void setRtuId(Integer rtuId) {
+	        this.rtuId = rtuId;
+	    }
 
-    public BigDecimal getDailyNegativeFlow() {
-        return dailyNegativeFlow;
-    }
+	    public Short getMpId() {
+	        return mpId;
+	    }
 
-    public void setDailyNegativeFlow(BigDecimal dailyNegativeFlow) {
-        this.dailyNegativeFlow = dailyNegativeFlow;
-    }
+	    public void setMpId(Short mpId) {
+	        this.mpId = mpId;
+	    }
 
-    public BigDecimal getDailyMaxVelocity() {
-        return dailyMaxVelocity;
-    }
+	    public Integer getYmd() {
+	        return ymd;
+	    }
 
-    public void setDailyMaxVelocity(BigDecimal dailyMaxVelocity) {
-        this.dailyMaxVelocity = dailyMaxVelocity;
-    }
+	    public void setYmd(Integer ymd) {
+	        this.ymd = ymd;
+	    }
 
-    public Date getDailyMaxVelocityTime() {
-        return dailyMaxVelocityTime;
-    }
+	    public Integer getHms() {
+	        return hms;
+	    }
 
-    public void setDailyMaxVelocityTime(Date dailyMaxVelocityTime) {
-        this.dailyMaxVelocityTime = dailyMaxVelocityTime;
-    }
+	    public void setHms(Integer hms) {
+	        this.hms = hms;
+	    }
 
-    public BigDecimal getBatteryVoltage() {
-        return batteryVoltage;
-    }
+	public BigDecimal getTotalFlow() {
+		return totalFlow;
+	}
 
-    public void setBatteryVoltage(BigDecimal batteryVoltage) {
-        this.batteryVoltage = batteryVoltage;
-    }
+	public void setTotalFlow(BigDecimal totalFlow) {
+		this.totalFlow = totalFlow;
+	}
 
-    public Byte getValveStatus() {
-        return valveStatus;
-    }
+	public BigDecimal getTotalPositiveFlow() {
+		return totalPositiveFlow;
+	}
 
-    public void setValveStatus(Byte valveStatus) {
-        this.valveStatus = valveStatus;
-    }
+	public void setTotalPositiveFlow(BigDecimal totalPositiveFlow) {
+		this.totalPositiveFlow = totalPositiveFlow;
+	}
+
+	public BigDecimal getTotalNegativeFlow() {
+		return totalNegativeFlow;
+	}
+
+	public void setTotalNegativeFlow(BigDecimal totalNegativeFlow) {
+		this.totalNegativeFlow = totalNegativeFlow;
+	}
+
+	public BigDecimal getDailyPositiveFlow() {
+		return dailyPositiveFlow;
+	}
+
+	public void setDailyPositiveFlow(BigDecimal dailyPositiveFlow) {
+		this.dailyPositiveFlow = dailyPositiveFlow;
+	}
+
+	public BigDecimal getDailyNegativeFlow() {
+		return dailyNegativeFlow;
+	}
+
+	public void setDailyNegativeFlow(BigDecimal dailyNegativeFlow) {
+		this.dailyNegativeFlow = dailyNegativeFlow;
+	}
+
+	public BigDecimal getDailyMaxVelocity() {
+		return dailyMaxVelocity;
+	}
+
+	public void setDailyMaxVelocity(BigDecimal dailyMaxVelocity) {
+		this.dailyMaxVelocity = dailyMaxVelocity;
+	}
+
+	public Date getDailyMaxVelocityTime() {
+		return dailyMaxVelocityTime;
+	}
+
+	public void setDailyMaxVelocityTime(Date dailyMaxVelocityTime) {
+		this.dailyMaxVelocityTime = dailyMaxVelocityTime;
+	}
+
+	public BigDecimal getBatteryVoltage() {
+		return batteryVoltage;
+	}
+
+	public void setBatteryVoltage(BigDecimal batteryVoltage) {
+		this.batteryVoltage = batteryVoltage;
+	}
+
+	public Byte getValveStatus() {
+		return valveStatus;
+	}
+
+	public void setValveStatus(Byte valveStatus) {
+		this.valveStatus = valveStatus;
+	}
 }

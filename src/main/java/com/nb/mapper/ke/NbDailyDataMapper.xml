@@ -21,36 +21,26 @@
     daily_negative_flow, daily_max_velocity, daily_max_velocity_time, battery_voltage, 
     valve_status
   </sql>
-  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="com.nb.model.ke.NbDailyDataKey" >
+  <select id="getNbDailyData" resultMap="BaseResultMap" parameterType="com.nb.model.ke.NbDailyData" >
     select 
     <include refid="Base_Column_List" />
-    from nb_daily_data_200808
+    from ${tableName}
     where rtu_id = #{rtuId,jdbcType=INTEGER}
       and mp_id = #{mpId,jdbcType=SMALLINT}
       and ymd = #{ymd,jdbcType=INTEGER}
       and hms = #{hms,jdbcType=INTEGER}
   </select>
-  <delete id="deleteByPrimaryKey" parameterType="com.nb.model.ke.NbDailyDataKey" >
-    delete from nb_daily_data_200808
+  
+  <delete id="deleteNbDailyData" parameterType="com.nb.model.ke.NbDailyData" >
+    delete from ${tableName}
     where rtu_id = #{rtuId,jdbcType=INTEGER}
       and mp_id = #{mpId,jdbcType=SMALLINT}
       and ymd = #{ymd,jdbcType=INTEGER}
       and hms = #{hms,jdbcType=INTEGER}
   </delete>
-  <insert id="insert" parameterType="com.nb.model.ke.NbDailyData" >
-    insert into nb_daily_data_200808 (rtu_id, mp_id, ymd, 
-      hms, total_flow, total_positive_flow, 
-      total_negative_flow, daily_positive_flow, daily_negative_flow, 
-      daily_max_velocity, daily_max_velocity_time, 
-      battery_voltage, valve_status)
-    values (#{rtuId,jdbcType=INTEGER}, #{mpId,jdbcType=SMALLINT}, #{ymd,jdbcType=INTEGER}, 
-      #{hms,jdbcType=INTEGER}, #{totalFlow,jdbcType=DECIMAL}, #{totalPositiveFlow,jdbcType=DECIMAL}, 
-      #{totalNegativeFlow,jdbcType=DECIMAL}, #{dailyPositiveFlow,jdbcType=DECIMAL}, #{dailyNegativeFlow,jdbcType=DECIMAL}, 
-      #{dailyMaxVelocity,jdbcType=DECIMAL}, #{dailyMaxVelocityTime,jdbcType=TIMESTAMP}, 
-      #{batteryVoltage,jdbcType=DECIMAL}, #{valveStatus,jdbcType=TINYINT})
-  </insert>
-  <insert id="insertSelective" parameterType="com.nb.model.ke.NbDailyData" >
-    insert into nb_daily_data_200808
+  
+  <insert id="insertNbDailyData" parameterType="com.nb.model.ke.NbDailyData" >
+    insert into ${tableName}
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="rtuId != null" >
         rtu_id,
@@ -134,8 +124,8 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.nb.model.ke.NbDailyData" >
-    update nb_daily_data_200808
+  <update id="updateNbDailyData" parameterType="com.nb.model.ke.NbDailyData" >
+    update ${tableName}
     <set >
       <if test="totalFlow != null" >
         total_flow = #{totalFlow,jdbcType=DECIMAL},
@@ -170,20 +160,5 @@
       and ymd = #{ymd,jdbcType=INTEGER}
       and hms = #{hms,jdbcType=INTEGER}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.nb.model.ke.NbDailyData" >
-    update nb_daily_data_200808
-    set total_flow = #{totalFlow,jdbcType=DECIMAL},
-      total_positive_flow = #{totalPositiveFlow,jdbcType=DECIMAL},
-      total_negative_flow = #{totalNegativeFlow,jdbcType=DECIMAL},
-      daily_positive_flow = #{dailyPositiveFlow,jdbcType=DECIMAL},
-      daily_negative_flow = #{dailyNegativeFlow,jdbcType=DECIMAL},
-      daily_max_velocity = #{dailyMaxVelocity,jdbcType=DECIMAL},
-      daily_max_velocity_time = #{dailyMaxVelocityTime,jdbcType=TIMESTAMP},
-      battery_voltage = #{batteryVoltage,jdbcType=DECIMAL},
-      valve_status = #{valveStatus,jdbcType=TINYINT}
-    where rtu_id = #{rtuId,jdbcType=INTEGER}
-      and mp_id = #{mpId,jdbcType=SMALLINT}
-      and ymd = #{ymd,jdbcType=INTEGER}
-      and hms = #{hms,jdbcType=INTEGER}
-  </update>
+   
 </mapper>

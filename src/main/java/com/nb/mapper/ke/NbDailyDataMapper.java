@@ -1,18 +1,16 @@
 package com.nb.mapper.ke;
 
+import org.apache.ibatis.annotations.Mapper;
+
 import com.nb.model.ke.NbDailyData;
-import com.nb.model.ke.NbDailyDataKey;
 
+@Mapper
 public interface NbDailyDataMapper {
-    int deleteByPrimaryKey(NbDailyDataKey key);
+	boolean deleteNbDailyData(NbDailyData key);
 
-    int insert(NbDailyData record);
+	boolean insertNbDailyData(NbDailyData record);
 
-    int insertSelective(NbDailyData record);
+	NbDailyData getNbDailyData(NbDailyData key);
 
-    NbDailyData selectByPrimaryKey(NbDailyDataKey key);
-
-    int updateByPrimaryKeySelective(NbDailyData record);
-
-    int updateByPrimaryKey(NbDailyData record);
+	boolean updateNbDailyData(NbDailyData record);
 }

@@ -32,7 +32,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.nb.exception.ResultBean;
 import com.nb.httputil.HttpsClientUtil;
 import com.nb.model.JFDayFlow;
-import com.nb.model.NbCommand;
+import com.nb.model.ke.NbCommand;
 import com.nb.model.SM4;
 import com.nb.protocolutil.SuntrontProtocolUtil;
 import com.nb.task.FxTelecomCallDataTask;

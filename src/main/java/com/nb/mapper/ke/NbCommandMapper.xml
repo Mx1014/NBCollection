@@ -22,36 +22,27 @@
   <sql id="Blob_Column_List" >
     command_content
   </sql>
-  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="com.nb.model.ke.NbCommandKey" >
+  <select id="getNbCommand" resultMap="ResultMapWithBLOBs" parameterType="com.nb.model.ke.NbCommand" >
     select 
     <include refid="Base_Column_List" />
     ,
     <include refid="Blob_Column_List" />
-    from nb_command_200808
+    from ${tableName}
     where rtu_id = #{rtuId,jdbcType=INTEGER}
       and mp_id = #{mpId,jdbcType=SMALLINT}
       and send_time = #{sendTime,jdbcType=TIMESTAMP}
       and command_type = #{commandType,jdbcType=TINYINT}
   </select>
-  <delete id="deleteByPrimaryKey" parameterType="com.nb.model.ke.NbCommandKey" >
-    delete from nb_command_200808
+  <delete id="deleteNbCommand" parameterType="com.nb.model.ke.NbCommand" >
+    delete from ${tableName}
     where rtu_id = #{rtuId,jdbcType=INTEGER}
       and mp_id = #{mpId,jdbcType=SMALLINT}
       and send_time = #{sendTime,jdbcType=TIMESTAMP}
       and command_type = #{commandType,jdbcType=TINYINT}
   </delete>
-  <insert id="insert" parameterType="com.nb.model.ke.NbCommand" >
-    insert into nb_command_200808 (rtu_id, mp_id, send_time, 
-      command_type, command_class, command_id, 
-      execute_result, report_time, operator_id, 
-      command_content)
-    values (#{rtuId,jdbcType=INTEGER}, #{mpId,jdbcType=SMALLINT}, #{sendTime,jdbcType=TIMESTAMP}, 
-      #{commandType,jdbcType=TINYINT}, #{commandClass,jdbcType=TINYINT}, #{commandId,jdbcType=VARCHAR}, 
-      #{executeResult,jdbcType=TINYINT}, #{reportTime,jdbcType=TIMESTAMP}, #{operatorId,jdbcType=INTEGER}, 
-      #{commandContent,jdbcType=LONGVARCHAR})
-  </insert>
-  <insert id="insertSelective" parameterType="com.nb.model.ke.NbCommand" >
-    insert into nb_command_200808
+  
+  <insert id="insertNbCommand" parameterType="com.nb.model.ke.NbCommand" >
+    insert into ${tableName}
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="rtuId != null" >
         rtu_id,
@@ -117,8 +108,9 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.nb.model.ke.NbCommand" >
-    update nb_command_200808
+  
+  <update id="updateNbCommand" parameterType="com.nb.model.ke.NbCommand" >
+    update ${tableName}
     <set >
       <if test="commandClass != null" >
         command_class = #{commandClass,jdbcType=TINYINT},
@@ -144,29 +136,5 @@
       and send_time = #{sendTime,jdbcType=TIMESTAMP}
       and command_type = #{commandType,jdbcType=TINYINT}
   </update>
-  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.nb.model.ke.NbCommand" >
-    update nb_command_200808
-    set command_class = #{commandClass,jdbcType=TINYINT},
-      command_id = #{commandId,jdbcType=VARCHAR},
-      execute_result = #{executeResult,jdbcType=TINYINT},
-      report_time = #{reportTime,jdbcType=TIMESTAMP},
-      operator_id = #{operatorId,jdbcType=INTEGER},
-      command_content = #{commandContent,jdbcType=LONGVARCHAR}
-    where rtu_id = #{rtuId,jdbcType=INTEGER}
-      and mp_id = #{mpId,jdbcType=SMALLINT}
-      and send_time = #{sendTime,jdbcType=TIMESTAMP}
-      and command_type = #{commandType,jdbcType=TINYINT}
-  </update>
-  <update id="updateByPrimaryKey" parameterType="com.nb.model.ke.NbCommand" >
-    update nb_command_200808
-    set command_class = #{commandClass,jdbcType=TINYINT},
-      command_id = #{commandId,jdbcType=VARCHAR},
-      execute_result = #{executeResult,jdbcType=TINYINT},
-      report_time = #{reportTime,jdbcType=TIMESTAMP},
-      operator_id = #{operatorId,jdbcType=INTEGER}
-    where rtu_id = #{rtuId,jdbcType=INTEGER}
-      and mp_id = #{mpId,jdbcType=SMALLINT}
-      and send_time = #{sendTime,jdbcType=TIMESTAMP}
-      and command_type = #{commandType,jdbcType=TINYINT}
-  </update>
+  
 </mapper>

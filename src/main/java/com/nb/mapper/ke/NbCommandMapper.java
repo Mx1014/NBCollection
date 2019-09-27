@@ -1,20 +1,17 @@
 package com.nb.mapper.ke;
 
+import org.apache.ibatis.annotations.Mapper;
+
 import com.nb.model.ke.NbCommand;
-import com.nb.model.ke.NbCommandKey;
 
+@Mapper
 public interface NbCommandMapper {
-    int deleteByPrimaryKey(NbCommandKey key);
+	boolean deleteNbCommand(NbCommand key);
 
-    int insert(NbCommand record);
+	boolean insertNbCommand(NbCommand record);
 
-    int insertSelective(NbCommand record);
+	NbCommand getNbCommand(NbCommand key);
 
-    NbCommand selectByPrimaryKey(NbCommandKey key);
+	boolean updateNbCommand(NbCommand record);
 
-    int updateByPrimaryKeySelective(NbCommand record);
-
-    int updateByPrimaryKeyWithBLOBs(NbCommand record);
-
-    int updateByPrimaryKey(NbCommand record);
 }

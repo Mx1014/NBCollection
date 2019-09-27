@@ -1,18 +1,17 @@
 package com.nb.mapper.ke;
 
+import org.apache.ibatis.annotations.Mapper;
+
 import com.nb.model.ke.NbInstantaneous;
-import com.nb.model.ke.NbInstantaneousKey;
 
+@Mapper
 public interface NbInstantaneousMapper {
-    int deleteByPrimaryKey(NbInstantaneousKey key);
+	boolean deleteNbInstantaneous(NbInstantaneous key);
 
-    int insert(NbInstantaneous record);
+	boolean insertNbInstantaneous(NbInstantaneous record);
 
-    int insertSelective(NbInstantaneous record);
+	NbInstantaneous getNbInstantaneous(NbInstantaneous key);
 
-    NbInstantaneous selectByPrimaryKey(NbInstantaneousKey key);
+	boolean updateNbInstantaneous(NbInstantaneous record);
 
-    int updateByPrimaryKeySelective(NbInstantaneous record);
-
-    int updateByPrimaryKey(NbInstantaneous record);
 }

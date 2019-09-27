@@ -1,65 +1,123 @@
 package com.nb.model.ke;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class NbCommand extends NbCommandKey {
-    private Byte commandClass;
+public class NbCommand implements Serializable {
+	private static final long serialVersionUID = -664716592362005541L;
 
-    private String commandId;
+	private Integer rtuId;
 
-    private Byte executeResult;
+	private Short mpId;
 
-    private Date reportTime;
+	private Date sendTime;
 
-    private Integer operatorId;
+	private Byte commandType;
+	private Byte commandClass;
 
-    private String commandContent;
+	private String commandId;
 
-    public Byte getCommandClass() {
-        return commandClass;
-    }
+	private Byte executeResult;
 
-    public void setCommandClass(Byte commandClass) {
-        this.commandClass = commandClass;
-    }
+	private Date reportTime;
 
-    public String getCommandId() {
-        return commandId;
-    }
+	private Integer operatorId;
 
-    public void setCommandId(String commandId) {
-        this.commandId = commandId == null ? null : commandId.trim();
-    }
+	private String commandContent;
+	
+	private String tableName;
 
-    public Byte getExecuteResult() {
-        return executeResult;
-    }
+	/**
+	 * @return the tableName
+	 */
+	public String getTableName() {
+		return tableName;
+	}
 
-    public void setExecuteResult(Byte executeResult) {
-        this.executeResult = executeResult;
-    }
+	/**
+	 * @param tableName the tableName to set
+	 */
+	public void setTableName(String tableName) {
+		this.tableName = "yddata.dbo.nb_command_" + tableName;
+	}
 
-    public Date getReportTime() {
-        return reportTime;
-    }
+	public Integer getRtuId() {
+		return rtuId;
+	}
 
-    public void setReportTime(Date reportTime) {
-        this.reportTime = reportTime;
-    }
+	public void setRtuId(Integer rtuId) {
+		this.rtuId = rtuId;
+	}
 
-    public Integer getOperatorId() {
-        return operatorId;
-    }
+	public Short getMpId() {
+		return mpId;
+	}
 
-    public void setOperatorId(Integer operatorId) {
-        this.operatorId = operatorId;
-    }
+	public void setMpId(Short mpId) {
+		this.mpId = mpId;
+	}
 
-    public String getCommandContent() {
-        return commandContent;
-    }
+	public Date getSendTime() {
+		return sendTime;
+	}
 
-    public void setCommandContent(String commandContent) {
-        this.commandContent = commandContent == null ? null : commandContent.trim();
-    }
+	public void setSendTime(Date sendTime) {
+		this.sendTime = sendTime;
+	}
+
+	public Byte getCommandType() {
+		return commandType;
+	}
+
+	public void setCommandType(Byte commandType) {
+		this.commandType = commandType;
+	}
+
+	public Byte getCommandClass() {
+		return commandClass;
+	}
+
+	public void setCommandClass(Byte commandClass) {
+		this.commandClass = commandClass;
+	}
+
+	public String getCommandId() {
+		return commandId;
+	}
+
+	public void setCommandId(String commandId) {
+		this.commandId = commandId == null ? null : commandId.trim();
+	}
+
+	public Byte getExecuteResult() {
+		return executeResult;
+	}
+
+	public void setExecuteResult(Byte executeResult) {
+		this.executeResult = executeResult;
+	}
+
+	public Date getReportTime() {
+		return reportTime;
+	}
+
+	public void setReportTime(Date reportTime) {
+		this.reportTime = reportTime;
+	}
+
+	public Integer getOperatorId() {
+		return operatorId;
+	}
+
+	public void setOperatorId(Integer operatorId) {
+		this.operatorId = operatorId;
+	}
+
+	public String getCommandContent() {
+		return commandContent;
+	}
+
+	public void setCommandContent(String commandContent) {
+		this.commandContent = commandContent == null ? null : commandContent.trim();
+	}
 }
