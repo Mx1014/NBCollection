@@ -14,4 +14,13 @@ public interface NbInstantaneousMapper {
 
 	boolean updateNbInstantaneous(NbInstantaneous record);
 
+	/** 
+	* @Title: isExist 
+	* @Description: 判断瞬时量是否存在 
+	* @param @param key
+	* @param @return    设定文件 
+	* @return boolean    返回类型 
+	* @throws 
+	*/
+	boolean isExist(NbInstantaneous key);
 }

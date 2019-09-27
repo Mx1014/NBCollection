@@ -1,7 +1,6 @@
 package com.nb.model.ke;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 
 public class NbInstantaneous implements Serializable {
 	private static final long serialVersionUID = -4718893979868663428L;
@@ -13,9 +12,25 @@ public class NbInstantaneous implements Serializable {
 	private Integer ymd;
 
 	private Integer hms;
-	private BigDecimal totalFlow;
+	private Double totalFlow;
 	private String tableName;
 	
+	/** 
+	* <p>Title: </p> 
+	* <p>Description: </p> 
+	* @param rtuId
+	* @param mpId
+	* @param ymd
+	* @param tableName 
+	*/
+	public NbInstantaneous(Integer rtuId, Short mpId, Integer ymd, String tableName) {
+		super();
+		this.rtuId = rtuId;
+		this.mpId = mpId;
+		this.ymd = ymd;
+		this.tableName = "yddata.dbo.nb_instantaneous_" + tableName;
+	}
+
 	/**
 	 * @return the tableName
 	 */
@@ -62,11 +77,11 @@ public class NbInstantaneous implements Serializable {
 		this.hms = hms;
 	}
 
-	public BigDecimal getTotalFlow() {
+	public Double getTotalFlow() {
 		return totalFlow;
 	}
 
-	public void setTotalFlow(BigDecimal totalFlow) {
+	public void setTotalFlow(Double totalFlow) {
 		this.totalFlow = totalFlow;
 	}
 }

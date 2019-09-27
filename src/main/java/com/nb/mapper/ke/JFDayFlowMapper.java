@@ -2,13 +2,13 @@ package com.nb.mapper.ke;
 
 import org.apache.ibatis.annotations.Mapper;
 
-import com.nb.model.JFDayFlow;
+import com.nb.model.ke.JFDayFlow;
 
 /** 
 * @ClassName: JFDayFlowMapper 
 * @Description: 流量计日数据数据库操作类
 * @author dbr
-* @date 2019�?4�?18�? 下午4:34:29 
+* @date 2019�?4�?18�? 下午4:34:29 
 *  
 */
 @Mapper
@@ -36,7 +36,7 @@ public interface JFDayFlowMapper {
     
     /** 
 	* @Title: isExist 
-	* @Description: 判断日数据是否存�?
+	* @Description: 判断日数据是否存�?
 	* @param @param nbDailyData
 	* @param @return    设定文件 
 	* @return boolean    返回类型 

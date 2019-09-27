@@ -31,6 +31,14 @@
       and hms = #{hms,jdbcType=INTEGER}
   </select>
   
+  	<select id="isExist" resultType="boolean" parameterType="com.nb.model.ke.NbDailyData">
+		select count('X') from ${tableName}
+		where rtu_id = #{rtuId,jdbcType=INTEGER}
+		and mp_id = #{mpId,jdbcType=SMALLINT}
+		and ymd = #{ymd,jdbcType=INTEGER}
+		<!-- and hms = #{hms,jdbcType=INTEGER} -->
+	</select>
+	
   <delete id="deleteNbDailyData" parameterType="com.nb.model.ke.NbDailyData" >
     delete from ${tableName}
     where rtu_id = #{rtuId,jdbcType=INTEGER}

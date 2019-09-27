@@ -1,6 +1,5 @@
 package com.nb.model.ke;
 
-import java.math.BigDecimal;
 import java.util.Date;
 
 public class NbWaterMeter extends NbWaterMeterKey {
@@ -24,25 +23,25 @@ public class NbWaterMeter extends NbWaterMeterKey {
 
     private String deviceId;
 
-    private BigDecimal lowVoltageThreshold;
+    private Double lowVoltageThreshold;
 
-    private BigDecimal lowPressureThreshold;
+    private Double lowPressureThreshold;
 
-    private BigDecimal highPressureThreshold;
+    private Double highPressureThreshold;
 
-    private BigDecimal highVoltageThreshold;
+    private Double highVoltageThreshold;
 
-    private BigDecimal largeFlowThreshold;
+    private Double largeFlowThreshold;
 
     private Integer largeFlowDuration;
 
     private Integer longTimeWaterUseThreshold;
 
-    private BigDecimal smallFlowThreshold;
+    private Double smallFlowThreshold;
 
     private Integer smallFlowDuration;
 
-    private Date reportBaseTime;
+    private String reportBaseTime;
 
     private Integer reportIntervalTime;
 
@@ -50,6 +49,7 @@ public class NbWaterMeter extends NbWaterMeterKey {
 
     private String firmwareVersion;
 
+    
     public Integer getAppinfoId() {
         return appinfoId;
     }
@@ -130,43 +130,43 @@ public class NbWaterMeter extends NbWaterMeterKey {
         this.deviceId = deviceId == null ? null : deviceId.trim();
     }
 
-    public BigDecimal getLowVoltageThreshold() {
+    public Double getLowVoltageThreshold() {
         return lowVoltageThreshold;
     }
 
-    public void setLowVoltageThreshold(BigDecimal lowVoltageThreshold) {
+    public void setLowVoltageThreshold(Double lowVoltageThreshold) {
         this.lowVoltageThreshold = lowVoltageThreshold;
     }
 
-    public BigDecimal getLowPressureThreshold() {
+    public Double getLowPressureThreshold() {
         return lowPressureThreshold;
     }
 
-    public void setLowPressureThreshold(BigDecimal lowPressureThreshold) {
+    public void setLowPressureThreshold(Double lowPressureThreshold) {
         this.lowPressureThreshold = lowPressureThreshold;
     }
 
-    public BigDecimal getHighPressureThreshold() {
+    public Double getHighPressureThreshold() {
         return highPressureThreshold;
     }
 
-    public void setHighPressureThreshold(BigDecimal highPressureThreshold) {
+    public void setHighPressureThreshold(Double highPressureThreshold) {
         this.highPressureThreshold = highPressureThreshold;
     }
 
-    public BigDecimal getHighVoltageThreshold() {
+    public Double getHighVoltageThreshold() {
         return highVoltageThreshold;
     }
 
-    public void setHighVoltageThreshold(BigDecimal highVoltageThreshold) {
+    public void setHighVoltageThreshold(Double highVoltageThreshold) {
         this.highVoltageThreshold = highVoltageThreshold;
     }
 
-    public BigDecimal getLargeFlowThreshold() {
+    public Double getLargeFlowThreshold() {
         return largeFlowThreshold;
     }
 
-    public void setLargeFlowThreshold(BigDecimal largeFlowThreshold) {
+    public void setLargeFlowThreshold(Double largeFlowThreshold) {
         this.largeFlowThreshold = largeFlowThreshold;
     }
 
@@ -186,11 +186,11 @@ public class NbWaterMeter extends NbWaterMeterKey {
         this.longTimeWaterUseThreshold = longTimeWaterUseThreshold;
     }
 
-    public BigDecimal getSmallFlowThreshold() {
+    public Double getSmallFlowThreshold() {
         return smallFlowThreshold;
     }
 
-    public void setSmallFlowThreshold(BigDecimal smallFlowThreshold) {
+    public void setSmallFlowThreshold(Double smallFlowThreshold) {
         this.smallFlowThreshold = smallFlowThreshold;
     }
 
@@ -202,11 +202,11 @@ public class NbWaterMeter extends NbWaterMeterKey {
         this.smallFlowDuration = smallFlowDuration;
     }
 
-    public Date getReportBaseTime() {
+    public String getReportBaseTime() {
         return reportBaseTime;
     }
 
-    public void setReportBaseTime(Date reportBaseTime) {
+    public void setReportBaseTime(String reportBaseTime) {
         this.reportBaseTime = reportBaseTime;
     }
 

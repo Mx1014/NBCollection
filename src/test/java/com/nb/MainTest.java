@@ -8,12 +8,13 @@
 */
 package com.nb;
 
-
 import static com.nb.utils.ConverterUtils.toLong;
 import static com.nb.utils.ConverterUtils.toStr;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteOrder;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
@@ -32,7 +33,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.nb.exception.ResultBean;
 import com.nb.httputil.HttpsClientUtil;
-import com.nb.model.JFDayFlow;
 import com.nb.model.ke.NbCommand;
 import com.nb.model.SM4;
 import com.nb.protocolutil.SuntrontProtocolUtil;
@@ -49,47 +49,48 @@ import com.nb.utils.StringUtil;
 
 import io.lettuce.core.protocol.CommandEncoder;
 
-/** 
-* @ClassName: MainTest 
-* @Description: TODO(这里用一句话描述这个类的作用) 
-* @author dbr
-* @date 2019年3月11日 下午2:21:57 
-*  
-*/
+/**
+ * @ClassName: MainTest
+ * @Description: TODO(这里用一句话描述这个类的作用)
+ * @author dbr
+ * @date 2019年3月11日 下午2:21:57
+ * 
+ */
 public class MainTest {
-	
-	/**
-     * 获取一个字节的bit数组
-     *
-     * @param value
-     * @return
-     */
-    public static byte[] getByteArray(byte value) {
-        byte[] byteArr = new byte[8]; //一个字节八位
-        for (int i = 7; i > 0; i--) {
-            byteArr[i] = (byte) (value & 1); //获取最低位
-            value = (byte) (value >> 1); //每次右移一位
-        }
-        return byteArr;
-    }
 
 	/**
-	 * @throws UnsupportedEncodingException  
-	* @Title: main 
-	* @Description: TODO(这里用一句话描述这个方法的作用) 
-	* @param @param args    设定文件 
-	* @return void    返回类型 
-	* @throws 
-	*/
-	public static void main(String[] args) throws UnsupportedEncodingException {
-		
-		 System.out.println(toStr(toLong("0869029032410846")));;
+	 * 获取一个字节的bit数组
+	 *
+	 * @param value
+	 * @return
+	 */
+	public static byte[] getByteArray(byte value) {
+		byte[] byteArr = new byte[8]; // 一个字节八位
+		for (int i = 7; i > 0; i--) {
+			byteArr[i] = (byte) (value & 1); // 获取最低位
+			value = (byte) (value >> 1); // 每次右移一位
+		}
+		return byteArr;
+	}
+
+	/**
+	 * @throws ParseException @throws UnsupportedEncodingException @Title:
+	 *                        main @Description: TODO(这里用一句话描述这个方法的作用) @param @param
+	 *                        args 设定文件 @return void 返回类型 @throws
+	 */
+	public static void main(String[] args) throws UnsupportedEncodingException, ParseException {
+
+		SimpleDateFormat sdf = new SimpleDateFormat("ssmmHHddMMyy");
+
+		System.out.println(BytesUtils.str2Bcd(sdf.format(new Date())).length);
+
+//		 System.out.println(toStr(toLong("0869029032410846")));;
 
 //		byte[] c = BytesUtils.hexStringToBytes("c0af");
 //		System.out.println(BytesUtils.bytesToHex(c));
 //		byte[] lenght = BytesUtils.getBytes((short)434);
 //				System.out.println(lenght.length);
-				
+
 //		System.out.println(BytesUtils.str2Bcd("0869029032410846").length);
 //
 //		System.out.println(SM4.getSecretKey(0, "869029032410846").getBytes().length);
@@ -113,8 +114,6 @@ public class MainTest {
 //		System.out.println(new String(imei));
 //		System.out.println(toLong("0869029032410846") % 10);
 //		System.out.println((byte)(toLong("0869029032410846") % 10));
-		
-		
 
 //		String text ="asdfghj34dfg大幅度tert";
 //		byte[] d = text.getBytes();
@@ -140,7 +139,7 @@ public class MainTest {
 //			System.out.print(b + "  ");
 //		}		
 //		System.out.println(DateUtils.formatDateByFormat(new Date(), "YYYY-MM-dd HH:mm:ss"));
-				
+
 //		JSONObject json = new JSONObject();
 //		json.put("HighPressureAlarmThreshold",2.9);
 //		json.put("LowPressureAlarmThreshold", 5);
@@ -149,24 +148,21 @@ public class MainTest {
 //		JSONObject responseJson= new JSONObject();
 //		String commandId = toStr(responseJson.getString("commandId"));
 //		System.out.println(commandId);
-		
+
 //		System.out.println(json);
 //		System.out.println(new Date(1558594321798L));
 //		byte aa = -65;
 //		System.out.println((aa & 0x80) == 0x80);	
 //		System.out.println(aa & 0x7F);		
 
-		
 //		JSONObject json = new JSONObject();
 //		json.put("SettingResponseState", 2);
 //		json.put("BatteryVoltage", 2.5);
-		
+
 //		Model m  = new Model();
 //		m = JsonUtil.jsonString2SimpleObj(json, Model.class);
 //		System.out.println(m.getBatteryVoltage() + " " + m.getSettingResponseState());
 
-		
-		
 //		byte a = -86;t`
 //		System.out.println(BytesUtils.byteToHex(a));
 //		String menteAddr ="08000000003000";
@@ -174,7 +170,6 @@ public class MainTest {
 //		msg= BytesUtils.invertArray(msg);
 //
 //		System.out.println(BytesUtils.bcdToString(msg));
-		
 
 //		byte[] cmd = BytesUtils.str2Bcd("00000002");
 //
@@ -182,7 +177,7 @@ public class MainTest {
 //		String serverTime = DateUtils.formatDateByFormat(new Date(), "mmHHddMMyy");
 
 //		System.out.println(SuntrontProtocolUtil.get50BD("300000000008"));		
-		
+
 //		JSONObject param = new JSONObject();
 //		String commandData = SuntrontProtocolUtil.sendVavleCommand(param.getIntValue("operate"));
 //		System.out.println(commandData);
@@ -192,13 +187,13 @@ public class MainTest {
 //
 //		System.arraycopy(r, 0, addr, 0, r.length);
 //		System.out.println(BytesUtils.bcdToString(addr));
- 
+
 //		for (byte b : r) {
 //			System.out.println(b);
 //		}
 //		System.arraycopy(r, 0, addr, addr.length-r.length, r.length);;
 //		System.out.println(BytesUtils.bcdToString(addr));
-		
+
 //		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 //		DataOutputStream dos = new DataOutputStream(bos);
 //		int vavleOperate = 1;
@@ -228,31 +223,31 @@ public class MainTest {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
-		
-		
+
 //		Date date = new Date(1558281600362L);
 //		System.out.println(BytesUtils.str2Bcd("34234")[0]);
 //		Calendar c = Calendar.getInstance();
 //		c.add(Calendar.DAY_OF_WEEK, Constant.ONE);
 //		
 //		System.out.println(c.getTime());
-		
+
 //		byte[] test = new byte[] {(byte) 139,1};
 //		if ((test[0] & 0x80) == 0x80) { //fu
 //			test[0] = (byte) (test[0] & 0x7F);
 //		}
 //		System.out.println(BytesUtils.getShort(test)); 
-		
+
 		JSONObject xt = new JSONObject();
 		xt.put("at", 1557909036230L);
 		xt.put("imei", "867726030828687");
 		xt.put("type", 1);
 		xt.put("ds_id", "3200_0_5505");
-		xt.put("value", "68a107250419208000d0bdad0017051900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000089860437161890071548086076504044047800000000000000000018110000000000000000005416150519241946314435300808affcc90000eeeeeeeeeeB71416");
+		xt.put("value",
+				"68a107250419208000d0bdad0017051900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000089860437161890071548086076504044047800000000000000000018110000000000000000005416150519241946314435300808affcc90000eeeeeeeeeeB71416");
 		xt.put("dev_id", 526298861);
 //		
 //		System.out.println(SuntrontProtocolUtil.parseDataMsg(xt));;
-		
+
 //		String data ="68a107250419208000d0bdad0017051900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000089860437161890071548086076504044047800000000000000000018110000000000000000005416150519241946314435300808affcc90000eeeeeeeeee";
 //		byte[] msg = BytesUtils.hexStringToBytes(data);
 //		String result = BytesUtils.bytesToHex(msg);
@@ -265,14 +260,12 @@ public class MainTest {
 
 //		int csq = BytesUtils.bcdToInt((byte)15);			
 //		System.out.println(csq + " "+ BytesUtils.byteToHex((byte)15));
-		
+
 //		JSONObject data = new JSONObject();
 //		data.put("msg", xt.toJSONString());
 //		data.put("nonce", "3aVj1y9+");
 //		data.put("signature", "iZI3Kut7Q7qGDqSq7A6tkw==");
-		
-		
-		
+
 //		String name ="杜宝瑞";
 //		byte[] nameByte = name.getBytes();
 //		
@@ -280,13 +273,11 @@ public class MainTest {
 //		System.out.println(encode);
 //		System.out.println(new String(Base64.getDecoder().decode(encode), "UTF-8"));
 
-		
 //		Date date = DateUtils.utcToLocal("20190506T162216Z", DateUtils.UTC_PATTERN);
 //		System.out.println(DateUtils.formatTimesTampDate(date));
 //		date = DateUtils.localToUTC("2019-05-07 00:22:16", DateUtils.TIMESTAMP_PATTERN);
 //		System.out.println(DateUtils.formatDateByFormat(date,  DateUtils.UTC_PATTERN));
 
-		
 //		Map<String, String> dataMap = new HashMap<String, String>();
 //		dataMap.put("dailyFlow", "12400");
 //		dataMap.put("dailyReverseFlow", "2400");
@@ -301,7 +292,7 @@ public class MainTest {
 ////		c.set(Calendar.MINUTE, 0);
 //		
 //		System.out.println(DateUtils.formatTimesTampDate(c.getTime()));
-		
+
 //		Map<String, String> dataMap = new HashMap<String, String>();
 //		dataMap.put("highFlowAlarm", "0");
 //		SuntrontWaterMeterAlarm suntrontwatermeteralarm = JsonUtil.map2Bean(dataMap, SuntrontWaterMeterAlarm.class);
@@ -318,14 +309,13 @@ public class MainTest {
 //		endDate.add(Calendar.DAY_OF_MONTH, Constant.TASK_ENDDATE);
 //		System.out.println(DateUtils.formatDateByFormat(endDate.getTime(), DateUtils.DATE_PATTERN));
 //		System.out.println(FxTelecomCallDataTask.class.getName());
-		
+
 //		System.out.println(DateUtils.parseTimesTampDate("20190424", DateUtils.DATE_PATTERN));
 		// TODO Auto-generated method stub
-		
+
 //		ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(1,
 //		        new BasicThreadFactory.Builder().namingPattern("example-schedule-pool-%d").daemon(true).build());   
-		
-		
+
 //		Date ymd = DateUtils.parseDate(toStr(20190423), DateUtils.DATE_PATTERN);
 //		Calendar cc = Calendar.getInstance();
 //		cc.setTime(ymd);
@@ -345,7 +335,7 @@ public class MainTest {
 //		System.out.println(map.size());
 
 //		executorService.execute(command);
-		
+
 //		System.out.println(CommandEnum.getresultValue("SEND"));
 //		Map<String, String> registerInfo = new HashMap<>();
 //		registerInfo.put("deviceId", "232321");
@@ -356,8 +346,7 @@ public class MainTest {
 
 //		ResultBean<JSONObject> result = new ResultBean<JSONObject>(Constant.ERROR, "配置信息错误");
 //		System.out.println(result);
-		
-		
+
 //		JSONObject deviceInfo = new JSONObject();
 //		deviceInfo.put("rtuId", 11);
 //		deviceInfo.put("mpId", 2);
@@ -366,7 +355,7 @@ public class MainTest {
 //		registerInfo = JsonUtil.jsonString2SimpleObj(deviceInfo, registerInfo.getClass());
 //		
 //		System.out.println("registerInfo : "+ registerInfo);
-		
+
 //		FXReport fx = new FXReport();
 //		fx.setCurrentDateTime(DateUtils.formatTimesTampDate(new Date()));
 //		
@@ -401,17 +390,15 @@ public class MainTest {
 //			System.out.println(periodReport.toString());
 //		
 //		System.out.println("index : " + index);
-		
-		
-		
+
 //		System.out.println(DateUtils.stampToDate(System.currentTimeMillis()));
-		
+
 //		DeviceAlarm b = JsonUtil.map2Bean(map, DeviceAlarm.class);
-		
+
 //		System.out.println(b.toString());
 		Long s = null;
 //		System.out.println( DateUtils.stampToDate(ConverterUtils.toLong(null)));
-		
+
 //		NbCommand command = new NbCommand();
 //		command.setRtuId(1);
 //		command.setCommandContent("dfdfdfsdf");

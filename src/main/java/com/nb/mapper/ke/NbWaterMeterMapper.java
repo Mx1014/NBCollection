@@ -1,18 +1,14 @@
 package com.nb.mapper.ke;
 
+import org.apache.ibatis.annotations.Mapper;
+
 import com.nb.model.ke.NbWaterMeter;
-import com.nb.model.ke.NbWaterMeterKey;
 
+@Mapper
 public interface NbWaterMeterMapper {
-    int deleteByPrimaryKey(NbWaterMeterKey key);
 
-    int insert(NbWaterMeter record);
+	NbWaterMeter getNbWaterMeter(String imei);
 
-    int insertSelective(NbWaterMeter record);
+	boolean updateNbWaterMeter(NbWaterMeter record);
 
-    NbWaterMeter selectByPrimaryKey(NbWaterMeterKey key);
-
-    int updateByPrimaryKeySelective(NbWaterMeter record);
-
-    int updateByPrimaryKey(NbWaterMeter record);
 }

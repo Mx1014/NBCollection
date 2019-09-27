@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nb.customer.alarm.AlarmCustomerThread;
-import com.nb.customer.historydatabase.BatteryDataCustomerThread;
 import com.nb.customer.historydatabase.DailyDataCustomerThread;
 import com.nb.customer.historydatabase.InstanceDataCustomerThread;
 import com.nb.utils.Constant;
@@ -31,7 +30,6 @@ public class ThreadManageController {
 	public String startAll() {
 		DailyDataCustomerThread.historyDatabaseRunFlag = true;
 		InstanceDataCustomerThread.historyDatabaseRunFlag = true;
-		BatteryDataCustomerThread.historyDatabaseRunFlag = true;
 		AlarmCustomerThread.alarmCustomerRunFlag = true;
 		return Constant.OK;
 	}
@@ -40,7 +38,6 @@ public class ThreadManageController {
 	public String stopAll() {
 		DailyDataCustomerThread.historyDatabaseRunFlag = false;
 		InstanceDataCustomerThread.historyDatabaseRunFlag = false;
-		BatteryDataCustomerThread.historyDatabaseRunFlag = false;
 		AlarmCustomerThread.alarmCustomerRunFlag = false;
 
 		return Constant.OK;
@@ -50,7 +47,6 @@ public class ThreadManageController {
 	public String startHistoryDatabase() {
 		DailyDataCustomerThread.historyDatabaseRunFlag = true;
 		InstanceDataCustomerThread.historyDatabaseRunFlag = true;
-		BatteryDataCustomerThread.historyDatabaseRunFlag = true;
 
 		return Constant.OK;
 	}
@@ -59,7 +55,6 @@ public class ThreadManageController {
 	public String stopHistoryDatabase() {
 		DailyDataCustomerThread.historyDatabaseRunFlag = false;
 		InstanceDataCustomerThread.historyDatabaseRunFlag = false;
-		BatteryDataCustomerThread.historyDatabaseRunFlag = false;
 		return Constant.OK;
 	}
 	

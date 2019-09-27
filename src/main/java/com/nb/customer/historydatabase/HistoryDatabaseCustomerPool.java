@@ -56,14 +56,6 @@ public class HistoryDatabaseCustomerPool {
 		}
 		System.out.println("瞬时量数据历史库线程启动成功");
 
-		ScheduledExecutorService batteryDatabaseCustomerPool = new ScheduledThreadPoolExecutor(historyDatabasePoolsize,
-				new BasicThreadFactory.Builder().namingPattern("battery-schedule-pool-%d").daemon(true).build());
-		for (int i = 0; i < historyDatabasePoolsize; i++) {
-			batteryDatabaseCustomerPool.execute(new BatteryDataCustomerThread(historyDatabaseExecutor));
-		}
-		System.out.println("电池电压数据历史库线程启动成功");
-
 	}
-	
 
 }

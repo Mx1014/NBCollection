@@ -13,4 +13,14 @@ public interface NbDailyDataMapper {
 	NbDailyData getNbDailyData(NbDailyData key);
 
 	boolean updateNbDailyData(NbDailyData record);
+	
+	/** 
+	* @Title: isExist 
+	* @Description: 判断日数据是否存在
+	* @param @param nbDailyData
+	* @param @return    设定文件 
+	* @return boolean    返回类型 
+	* @throws 
+	*/
+	boolean isExist(NbDailyData nbDailyData);
 }

@@ -15,8 +15,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -28,10 +33,14 @@ import com.nb.httputil.HttpsClientUtil;
 import com.nb.logger.LogName;
 import com.nb.logger.LoggerUtil;
 import com.nb.mapper.CommonMapper;
+import com.nb.mapper.ke.NbWaterMeterMapper;
 import com.nb.model.DeviceInfo;
 import com.nb.model.SM4;
 import com.nb.model.StreamClosedHttpResponse;
 import com.nb.model.ke.KeMsg;
+import com.nb.model.ke.NbDailyData;
+import com.nb.model.ke.NbInstantaneous;
+import com.nb.model.ke.NbWaterMeter;
 import com.nb.utils.BytesUtils;
 import com.nb.utils.CommFunc;
 import com.nb.utils.Constant;
@@ -40,6 +49,7 @@ import com.nb.utils.DateUtils;
 
 import static com.nb.utils.ConverterUtils.*;
 import com.nb.utils.JedisUtils;
+import com.nb.utils.JsonUtil;
 import com.nb.utils.NumberUtils;
 import com.nb.utils.SM4Utils;
 
@@ -55,19 +65,28 @@ public class KeProtocolUtil {
 
 	@Resource
 	private CommonMapper commonMapper;
+	@Resource
+	private NbWaterMeterMapper nbWaterMeterMapper;
+		
 	public static KeProtocolUtil keProtocolUtil;
 
 	@PostConstruct
 	private void init() {
 		keProtocolUtil = this;
 		keProtocolUtil.commonMapper = this.commonMapper;
+		keProtocolUtil.nbWaterMeterMapper = this.nbWaterMeterMapper;
 	}
 
-	/**
-	 * 解析上报数据帧 @Title: parseDataFrame @param @param
-	 * msgJson @param @return @param @throws Exception 设定文件 @return JSONObject
-	 * 返回类型 @throws
-	 */
+	 
+	/** 
+	*  解析上报数据帧 
+	* @Title: parseDataFrame 
+	* @param @param dataFrame
+	* @param @return
+	* @param @throws Exception    设定文件 
+	* @return JSONObject    返回类型 
+	* @throws 
+	*/
 	public static JSONObject parseDataFrame(byte[] dataFrame) throws Exception {
 		/** 验证接收到的消息，并返回数据部分 */
 		KeMsg keMsg = verifyDataFrame(dataFrame);
@@ -121,11 +140,17 @@ public class KeProtocolUtil {
 		return dataJson;
 	}
 
+	 
 	/**
-	 * (这里用一句话描述这个方法的作用) @Title: parseC0A0 @param @param keMsg @param @return
-	 * 设定文件 @return JSONObject 返回类型 @throws
-	 */
-	private static JSONObject parseC0A0(KeMsg keMsg) {
+	 * @throws ParseException  
+	* 解析C0A0帧
+	* @Title: parseC0A0 
+	* @param @param keMsg
+	* @param @return    设定文件 
+	* @return JSONObject    返回类型 
+	* @throws 
+	*/
+	private static JSONObject parseC0A0(KeMsg keMsg) throws ParseException {
 		JSONObject rtnJson = new JSONObject();
 		String imei = String.format("%016d", toLong(keMsg.getImei()));
 
@@ -270,8 +295,33 @@ public class KeProtocolUtil {
 			}
 
 			/** 存库操作 nb_daily_data_200808 nb_instantaneous_200808 */
+			imeiCode = toStr(toLong(imeiCode));
+			NbWaterMeter nbWaterMeter = keProtocolUtil.nbWaterMeterMapper.getNbWaterMeter(imeiCode);
+			nbWaterMeter.setFirmwareVersion(version);
+			nbWaterMeter.setLowVoltageThreshold(lowVoltageAlarmThreshold);
+			nbWaterMeter.setLowPressureThreshold(toDouble(data23));
+			nbWaterMeter.setHighPressureThreshold(toDouble(data22));
+			nbWaterMeter.setLargeFlowThreshold(toDouble(largeFlowAlarmThreshold));
+			nbWaterMeter.setLargeFlowDuration(toInt(largeFlowAlarmThresholdTime));
+			nbWaterMeter.setLongTimeWaterUseThreshold(toInt(longTimeUseWaterThresholdTime));
+			nbWaterMeter.setSmallFlowThreshold(smallFlowAlarmThreshold);
+			nbWaterMeter.setSmallFlowDuration(toInt(smallFlowAlarmThresholdTime));
+
+			reportBaseTime = reportBaseTime.substring(0, 10) + "20" + reportBaseTime.substring(10);
+			SimpleDateFormat sdf = new SimpleDateFormat("ssmmHHddMMyyyy");
+			Date reportBaseDate = sdf.parse(freezeDate);
+			nbWaterMeter.setReportBaseTime(DateUtils.formatTimesTampDate(reportBaseDate));
+			nbWaterMeter.setReportIntervalTime(toInt(data15));
+			nbWaterMeter.setValveStatus(valveStatus);
+			nbWaterMeter.setFirmwareVersion(version);
+			keProtocolUtil.nbWaterMeterMapper.updateNbWaterMeter(nbWaterMeter);
 			
- 			rtnJson.put("control", "C0A0");
+			saveDailyData(nbWaterMeter, freezeDate, totalFlow, totalPositiveFlow, totalNegativeFlow, dailyPositiveFlow,
+					dailyNegativeFlow, dailyMaxVelocity, dailyMaxVelocityTime, batteryVoltage, valveStatus);
+			
+			saveInstantaneousData(nbWaterMeter, freezeDate, data6);
+			
+			rtnJson.put("control", "C0A0");
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
@@ -279,17 +329,117 @@ public class KeProtocolUtil {
 
 		return rtnJson;
 	}
-
-	private void saveDailyData(String freezeDate, double totalFlow, double totalPositiveFlow, double totalNegativeFlow,
-			double dailyPositiveFlow, double dailyNegativeFlow, double dailyMaxVelocity, String dailyMaxVelocityTime,
-			double batteryVoltage, String valveStatus) {
-
-	}
+	
 
 	/**
-	 * 解析设备请求更新密钥，剩下新密钥后存入redis，然后下发直接命令下发40AF @Title: parseC0AF @param @param
-	 * keMsg @param @return 设定文件 @return JSONObject 返回类型 @throws
-	 */
+	 * @throws ParseException  
+	* 组建水表上报日数据，存入redis队列
+	* @Title: saveDailyData 
+	* @param @param nbWaterMeter
+	* @param @param freezeDate
+	* @param @param totalFlow
+	* @param @param totalPositiveFlow
+	* @param @param totalNegativeFlow
+	* @param @param dailyPositiveFlow
+	* @param @param dailyNegativeFlow
+	* @param @param dailyMaxVelocity
+	* @param @param dailyMaxVelocityTime
+	* @param @param batteryVoltage
+	* @param @param valveStatus    设定文件 
+	* @return void    返回类型 
+	* @throws 
+	*/
+	private static void saveDailyData(NbWaterMeter nbWaterMeter, String freezeDate, double totalFlow,
+			double totalPositiveFlow, double totalNegativeFlow, double dailyPositiveFlow, double dailyNegativeFlow,
+			double dailyMaxVelocity, String dailyMaxVelocityTime, double batteryVoltage, byte valveStatus)
+			throws ParseException {
+
+		NbDailyData nbdailyData = new NbDailyData(nbWaterMeter.getRtuId(), nbWaterMeter.getMpId(), totalFlow,
+				totalPositiveFlow, totalNegativeFlow, dailyPositiveFlow, dailyNegativeFlow, dailyMaxVelocity,
+				batteryVoltage, valveStatus);
+		freezeDate = freezeDate.substring(0, 10) + "20" + freezeDate.substring(10);
+		SimpleDateFormat sdf = new SimpleDateFormat("ssmmHHddMMyyyy");
+		Date reprotDate = sdf.parse(freezeDate);
+		int ymd = toInt(DateUtils.formatDateByFormat(reprotDate, "yyyyMMdd"));
+		nbdailyData.setYmd(ymd);
+		nbdailyData.setHms(toInt(DateUtils.formatDateByFormat(reprotDate, "HHmmss")));
+		nbdailyData.setTableName(toStr(ymd / Constant.NUM_100));		
+		
+		dailyMaxVelocityTime = dailyMaxVelocityTime.substring(0, 10) + "20" + dailyMaxVelocityTime.substring(10);
+		Date maxVelocityTime = sdf.parse(freezeDate);
+		nbdailyData.setDailyMaxVelocityTime(DateUtils.formatTimesTampDate(maxVelocityTime));
+
+		JedisUtils.lpush(Constant.HISTORY_DAILY_QUEUE, JsonUtil.jsonObj2Sting(nbdailyData));
+	}
+	
+	/**
+	 * @throws IOException  
+	*保存瞬时量数据 
+	* @Title: saveInstantaneousData 
+	* @param @param nbWaterMeter
+	* @param @param freezeDate
+	* @param @param data
+	* @param @throws ParseException    设定文件 
+	* @return void    返回类型 
+	* @throws 
+	*/
+	private static void saveInstantaneousData(NbWaterMeter nbWaterMeter, String freezeDate, byte[] data)
+			throws ParseException, IOException {
+		freezeDate = freezeDate.substring(0, 10) + "20" + freezeDate.substring(10);
+		SimpleDateFormat sdf = new SimpleDateFormat("ssmmHHddMMyyyy");
+		Date reprotDate = sdf.parse(freezeDate);
+		int ymd = toInt(DateUtils.formatDateByFormat(reprotDate, "yyyyMMdd"));
+
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(DateUtils.parseTimesTampDate(toStr(ymd), DateUtils.DATE_PATTERN));
+		cal.add(Calendar.DAY_OF_YEAR, -1);
+
+		ymd = toInt(DateUtils.parseDate(cal.getTime(), DateUtils.DATE_PATTERN));
+		NbInstantaneous nbInstantaneous = new NbInstantaneous(nbWaterMeter.getRtuId(), nbWaterMeter.getMpId(), ymd,
+				toStr(ymd / Constant.NUM_100));
+
+		List<Double> flowList = getInstantaneousData(data);
+		for (int i = 0; i < flowList.size(); i++) {
+			int time = toInt(DateUtils.formatDateByFormat(cal.getTime(), DateUtils.TIME_PATTERN));
+			nbInstantaneous.setHms(time);
+			nbInstantaneous.setTotalFlow(flowList.get(i));
+
+			JedisUtils.lpush(Constant.HISTORY_INSTAN_QUEUE, JsonUtil.jsonObj2Sting(nbInstantaneous));
+			cal.add(Calendar.MINUTE, Constant.NUM_30);
+		}
+	}
+	
+	/** 
+	* 获取瞬时量数据 
+	* @Title: getInstantaneousData 
+	* @param @param data
+	* @param @return
+	* @param @throws IOException    设定文件 
+	* @return List<Double>    返回类型 
+	* @throws 
+	*/
+	private static List<Double> getInstantaneousData(byte[] data) throws IOException {
+		int length = data.length / Constant.TWO;
+		ByteArrayInputStream bais = new ByteArrayInputStream(data);
+		DataInputStream dis = new DataInputStream(bais);
+		List<Double> flowList = new ArrayList<Double>();
+		for (int i = 0; i < length; i++) {
+			byte[] data1 = new byte[Constant.TWO];
+			dis.read(data1);
+			double flow = getDouble(invertArray(data1)) / Constant.NUM_1000;
+			flowList.add(flow);
+		}
+		return flowList;
+	}
+
+	/** 
+	* 解析设备请求更新密钥，剩下新密钥后存入redis，然后下发直接命令下发40AF 
+	* @Title: parseC0AF 
+	* @param @param keMsg
+	* @param @return    设定文件 
+	* @return JSONObject    返回类型 
+	* @throws 
+	*/
 	private static JSONObject parseC0AF(KeMsg keMsg) {
 		JSONObject rtnJson = new JSONObject();
 		String defaultKey = String.format("%016d", toLong(keMsg.getImei()));
@@ -345,10 +495,16 @@ public class KeProtocolUtil {
 		return rtnJson;
 	}
 
-	/**
-	 * 组建40AF帧 @Title: make40AFFrame @param @param imei @param @return 设定文件 @return
-	 * String 返回类型 @throws
-	 */
+	
+	
+	/** 
+	* 组建40AF帧
+	* @Title: make40AFFrame 
+	* @param @param imei
+	* @param @return    设定文件 
+	* @return String    返回类型 
+	* @throws 
+	*/
 	public static String make40AFFrame(String imei) {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(bos);
@@ -407,11 +563,81 @@ public class KeProtocolUtil {
 		}
 		return dataFrame;
 	}
+	
+	/** 
+	* 组建40A0帧 
+	* @Title: make40A0Frame 
+	* @param @param imei
+	* @param @return    设定文件 
+	* @return String    返回类型 
+	* @throws 
+	*/
+	public static String make40A0Frame(String imei) {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		DataOutputStream dos = new DataOutputStream(bos);
+		String dataFrame = null;
+		imei = String.format("%016d", toLong(imei));
+		try {
+			/** 起始字符 */
+			dos.writeByte(0x68);
+			/** 规约类型 */
+			dos.writeByte(0x20);
+			/** 消息属性 */
+			dos.writeByte(0x01);
+			/** imei */
+			byte[] imeiBcd = BytesUtils.str2Bcd(imei);
+			dos.write(imeiBcd);
+			/** 控制码 */
+			dos.writeShort(0x40A0);
 
-	/**
-	 * 验证消息，并返回数据部分 @Title: verifyDataFrames @param @param
-	 * msg @param @return @param @throws Exception 设定文件 @return KeMsg 返回类型 @throws
-	 */
+			ByteArrayOutputStream dataBos = new ByteArrayOutputStream();
+			DataOutputStream dataDos = new DataOutputStream(dataBos);
+			/** 处理结果 */
+			dataDos.write(0x00);
+			/** 主站时钟 */		
+			SimpleDateFormat sdf = new SimpleDateFormat("ssmmHHddMMyy");
+			dataDos.write(BytesUtils.str2Bcd(sdf.format(new Date())));
+			/** 备用字节 */
+			byte[] back = new byte[Constant.TEN];
+			dataDos.write(back);
+			
+			/** imei */
+			dataDos.write(imeiBcd);
+
+			/** crc校验 */
+			dataDos.write(hexStringToBytes(getReserveCrc(dataBos.toByteArray())));
+			
+			/** 使用密钥加密 */
+			String secretKey = JedisUtils.get(imei);
+			SM4Utils sm4 = new SM4Utils();
+			sm4.secretKey = secretKey;
+			sm4.hexString = false;
+			byte[] encryptedData = sm4.encryptDataECB(dataBos.toByteArray());
+		
+			/** 数据长度 */
+			byte[] lenght = BytesUtils.getBytes((short) encryptedData.length);
+			dos.write(BytesUtils.invertArray(lenght));
+			/** 数据（加密） */
+			dos.write(encryptedData);
+
+			dos.write(hexStringToBytes(getReserveCrc(bos.toByteArray())));
+			dos.writeByte(0x16);
+			dataFrame = BytesUtils.bytesToHex(bos.toByteArray());
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return dataFrame;
+	}
+
+	/** 
+	*  验证消息，并返回数据部分 
+	* @Title: verifyDataFrame 
+	* @param @param msg
+	* @param @return    设定文件 
+	* @return KeMsg    返回类型 
+	* @throws 
+	*/
 	private static KeMsg verifyDataFrame(byte[] msg) {
 
 		ByteArrayInputStream bais = new ByteArrayInputStream(msg);
@@ -420,14 +646,14 @@ public class KeProtocolUtil {
 		try {
 			/** 起始字符 */
 			byte frameStart = dis.readByte();
-			if (frameStart != 0x68) {
+			if (frameStart != Constant.FRAME_START) {
 				System.out.println("起始字符错误");
 				return null;
 			}
 
 			/** 规约类型 */
 			byte protocolType = dis.readByte();
-			if (protocolType != 0x20) {
+			if (protocolType != Constant.NB_TYPE) {
 				System.out.println("规约类型错误");
 				return null;
 			}
@@ -471,7 +697,7 @@ public class KeProtocolUtil {
 
 			/** 结束字符 */
 			byte end = dis.readByte();
-			if (end != 0x16) {
+			if (end != Constant.FRAME_END) {
 				System.out.println("结束字符错误");
 				return null;
 			}

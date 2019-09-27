@@ -1,7 +1,6 @@
 package com.nb.model.ke;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.Date;
 
 public class NbDailyData implements Serializable {
@@ -16,27 +15,56 @@ public class NbDailyData implements Serializable {
 
 	private Integer hms;
 
-	private BigDecimal totalFlow;
+	private Double totalFlow;
 
-	private BigDecimal totalPositiveFlow;
+	private Double totalPositiveFlow;
 
-	private BigDecimal totalNegativeFlow;
+	private Double totalNegativeFlow;
 
-	private BigDecimal dailyPositiveFlow;
+	private Double dailyPositiveFlow;
 
-	private BigDecimal dailyNegativeFlow;
+	private Double dailyNegativeFlow;
 
-	private BigDecimal dailyMaxVelocity;
+	private Double dailyMaxVelocity;
 
-	private Date dailyMaxVelocityTime;
+	private String dailyMaxVelocityTime;
 
-	private BigDecimal batteryVoltage;
+	private Double batteryVoltage;
 
 	private Byte valveStatus;
 	
 	private String tableName;
-	
-	 /**
+	 /** 
+	* <p>Title: </p> 
+	* <p>Description: </p> 
+	* @param rtuId
+	* @param mpId
+	* @param totalFlow
+	* @param totalPositiveFlow
+	* @param totalNegativeFlow
+	* @param dailyPositiveFlow
+	* @param dailyNegativeFlow
+	* @param dailyMaxVelocity
+	* @param batteryVoltage
+	* @param valveStatus 
+	*/
+	public NbDailyData(Integer rtuId, Short mpId, Double totalFlow, Double totalPositiveFlow, Double totalNegativeFlow,
+			Double dailyPositiveFlow, Double dailyNegativeFlow, Double dailyMaxVelocity, Double batteryVoltage,
+			Byte valveStatus) {
+		super();
+		this.rtuId = rtuId;
+		this.mpId = mpId;
+		this.totalFlow = totalFlow;
+		this.totalPositiveFlow = totalPositiveFlow;
+		this.totalNegativeFlow = totalNegativeFlow;
+		this.dailyPositiveFlow = dailyPositiveFlow;
+		this.dailyNegativeFlow = dailyNegativeFlow;
+		this.dailyMaxVelocity = dailyMaxVelocity;
+ 		this.batteryVoltage = batteryVoltage;
+		this.valveStatus = valveStatus;
+	}
+
+	/**
 	 * @return the tableName
 	 */
 	public String getTableName() {
@@ -82,67 +110,67 @@ public class NbDailyData implements Serializable {
 	        this.hms = hms;
 	    }
 
-	public BigDecimal getTotalFlow() {
+	public Double getTotalFlow() {
 		return totalFlow;
 	}
 
-	public void setTotalFlow(BigDecimal totalFlow) {
+	public void setTotalFlow(Double totalFlow) {
 		this.totalFlow = totalFlow;
 	}
 
-	public BigDecimal getTotalPositiveFlow() {
+	public Double getTotalPositiveFlow() {
 		return totalPositiveFlow;
 	}
 
-	public void setTotalPositiveFlow(BigDecimal totalPositiveFlow) {
+	public void setTotalPositiveFlow(Double totalPositiveFlow) {
 		this.totalPositiveFlow = totalPositiveFlow;
 	}
 
-	public BigDecimal getTotalNegativeFlow() {
+	public Double getTotalNegativeFlow() {
 		return totalNegativeFlow;
 	}
 
-	public void setTotalNegativeFlow(BigDecimal totalNegativeFlow) {
+	public void setTotalNegativeFlow(Double totalNegativeFlow) {
 		this.totalNegativeFlow = totalNegativeFlow;
 	}
 
-	public BigDecimal getDailyPositiveFlow() {
+	public Double getDailyPositiveFlow() {
 		return dailyPositiveFlow;
 	}
 
-	public void setDailyPositiveFlow(BigDecimal dailyPositiveFlow) {
+	public void setDailyPositiveFlow(Double dailyPositiveFlow) {
 		this.dailyPositiveFlow = dailyPositiveFlow;
 	}
 
-	public BigDecimal getDailyNegativeFlow() {
+	public Double getDailyNegativeFlow() {
 		return dailyNegativeFlow;
 	}
 
-	public void setDailyNegativeFlow(BigDecimal dailyNegativeFlow) {
+	public void setDailyNegativeFlow(Double dailyNegativeFlow) {
 		this.dailyNegativeFlow = dailyNegativeFlow;
 	}
 
-	public BigDecimal getDailyMaxVelocity() {
+	public Double getDailyMaxVelocity() {
 		return dailyMaxVelocity;
 	}
 
-	public void setDailyMaxVelocity(BigDecimal dailyMaxVelocity) {
+	public void setDailyMaxVelocity(Double dailyMaxVelocity) {
 		this.dailyMaxVelocity = dailyMaxVelocity;
 	}
 
-	public Date getDailyMaxVelocityTime() {
+	public String getDailyMaxVelocityTime() {
 		return dailyMaxVelocityTime;
 	}
 
-	public void setDailyMaxVelocityTime(Date dailyMaxVelocityTime) {
+	public void setDailyMaxVelocityTime(String dailyMaxVelocityTime) {
 		this.dailyMaxVelocityTime = dailyMaxVelocityTime;
 	}
 
-	public BigDecimal getBatteryVoltage() {
+	public Double getBatteryVoltage() {
 		return batteryVoltage;
 	}
 
-	public void setBatteryVoltage(BigDecimal batteryVoltage) {
+	public void setBatteryVoltage(Double batteryVoltage) {
 		this.batteryVoltage = batteryVoltage;
 	}
 

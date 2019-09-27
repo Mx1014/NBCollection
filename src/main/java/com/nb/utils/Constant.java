@@ -506,6 +506,13 @@ public class Constant {
 
 	/** 设备密钥KEY redis前缀*/
 	public static final String DEVICE_KEY = "DEVICE_KEY:";
+	public static final int NUM_100 = 100;
+	public static final int NUM_30 = 30;
+	
+	public static final byte FRAME_START= 0x68;
+	public static final byte FRAME_END= 0x16;
+	public static final byte NB_TYPE = 0x20;
+
 }
 
 

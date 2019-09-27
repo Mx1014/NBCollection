@@ -14,6 +14,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import com.nb.model.DeviceInfo;
+import com.nb.model.ke.NbWaterMeter;
  
 /** 
 * @ClassName: CommonMapper 
