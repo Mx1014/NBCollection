@@ -1,7 +1,6 @@
 use yddata;
 GO
-
---   '-------Create table NB水表日数据结构表(nb_alarm_200808) on yddata-------'
+--   '-------Create table NB水表日数据结构表(nb_daily_data_200808) on yddata-------'
 -- 标记开始
 if not exists (select * from sysobjects where name = 'nb_daily_data_200808')
 begin
@@ -33,7 +32,8 @@ end
 go
 -- 标记结束
 
---   '-------Create table NB水表日数据结构表(nb_alarm_200808) on yddata-------'
+
+--   '-------Create table NB水表日数据结构表(nb_instantaneous_200808) on yddata-------'
 -- 标记开始
 if not exists (select * from sysobjects where name = 'nb_instantaneous_200808')
 begin
@@ -54,7 +54,8 @@ end
 go
 -- 标记结束
 
---   '-------Create table NB任务命令结构表(nb_alarm_200808) on yddata-------'
+
+--   '-------Create table NB任务命令结构表(nb_command_200808) on yddata-------'
 -- 标记开始
 if not exists (select * from sysobjects where name = 'nb_command_200808')
 begin

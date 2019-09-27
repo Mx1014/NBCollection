@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.nb.mapper.ke.NbDailyDataMapper" >
+  <resultMap id="BaseResultMap" type="com.nb.model.ke.NbDailyData" >
+    <id column="rtu_id" property="rtuId" jdbcType="INTEGER" />
+    <id column="mp_id" property="mpId" jdbcType="SMALLINT" />
+    <id column="ymd" property="ymd" jdbcType="INTEGER" />
+    <id column="hms" property="hms" jdbcType="INTEGER" />
+    <result column="total_flow" property="totalFlow" jdbcType="DECIMAL" />
+    <result column="total_positive_flow" property="totalPositiveFlow" jdbcType="DECIMAL" />
+    <result column="total_negative_flow" property="totalNegativeFlow" jdbcType="DECIMAL" />
+    <result column="daily_positive_flow" property="dailyPositiveFlow" jdbcType="DECIMAL" />
+    <result column="daily_negative_flow" property="dailyNegativeFlow" jdbcType="DECIMAL" />
+    <result column="daily_max_velocity" property="dailyMaxVelocity" jdbcType="DECIMAL" />
+    <result column="daily_max_velocity_time" property="dailyMaxVelocityTime" jdbcType="TIMESTAMP" />
+    <result column="battery_voltage" property="batteryVoltage" jdbcType="DECIMAL" />
+    <result column="valve_status" property="valveStatus" jdbcType="TINYINT" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    rtu_id, mp_id, ymd, hms, total_flow, total_positive_flow, total_negative_flow, daily_positive_flow, 
+    daily_negative_flow, daily_max_velocity, daily_max_velocity_time, battery_voltage, 
+    valve_status
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="com.nb.model.ke.NbDailyDataKey" >
+    select 
+    <include refid="Base_Column_List" />
+    from nb_daily_data_200808
+    where rtu_id = #{rtuId,jdbcType=INTEGER}
+      and mp_id = #{mpId,jdbcType=SMALLINT}
+      and ymd = #{ymd,jdbcType=INTEGER}
+      and hms = #{hms,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="com.nb.model.ke.NbDailyDataKey" >
+    delete from nb_daily_data_200808
+    where rtu_id = #{rtuId,jdbcType=INTEGER}
+      and mp_id = #{mpId,jdbcType=SMALLINT}
+      and ymd = #{ymd,jdbcType=INTEGER}
+      and hms = #{hms,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.nb.model.ke.NbDailyData" >
+    insert into nb_daily_data_200808 (rtu_id, mp_id, ymd, 
+      hms, total_flow, total_positive_flow, 
+      total_negative_flow, daily_positive_flow, daily_negative_flow, 
+      daily_max_velocity, daily_max_velocity_time, 
+      battery_voltage, valve_status)
+    values (#{rtuId,jdbcType=INTEGER}, #{mpId,jdbcType=SMALLINT}, #{ymd,jdbcType=INTEGER}, 
+      #{hms,jdbcType=INTEGER}, #{totalFlow,jdbcType=DECIMAL}, #{totalPositiveFlow,jdbcType=DECIMAL}, 
+      #{totalNegativeFlow,jdbcType=DECIMAL}, #{dailyPositiveFlow,jdbcType=DECIMAL}, #{dailyNegativeFlow,jdbcType=DECIMAL}, 
+      #{dailyMaxVelocity,jdbcType=DECIMAL}, #{dailyMaxVelocityTime,jdbcType=TIMESTAMP}, 
+      #{batteryVoltage,jdbcType=DECIMAL}, #{valveStatus,jdbcType=TINYINT})
+  </insert>
+  <insert id="insertSelective" parameterType="com.nb.model.ke.NbDailyData" >
+    insert into nb_daily_data_200808
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="rtuId != null" >
+        rtu_id,
+      </if>
+      <if test="mpId != null" >
+        mp_id,
+      </if>
+      <if test="ymd != null" >
+        ymd,
+      </if>
+      <if test="hms != null" >
+        hms,
+      </if>
+      <if test="totalFlow != null" >
+        total_flow,
+      </if>
+      <if test="totalPositiveFlow != null" >
+        total_positive_flow,
+      </if>
+      <if test="totalNegativeFlow != null" >
+        total_negative_flow,
+      </if>
+      <if test="dailyPositiveFlow != null" >
+        daily_positive_flow,
+      </if>
+      <if test="dailyNegativeFlow != null" >
+        daily_negative_flow,
+      </if>
+      <if test="dailyMaxVelocity != null" >
+        daily_max_velocity,
+      </if>
+      <if test="dailyMaxVelocityTime != null" >
+        daily_max_velocity_time,
+      </if>
+      <if test="batteryVoltage != null" >
+        battery_voltage,
+      </if>
+      <if test="valveStatus != null" >
+        valve_status,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="rtuId != null" >
+        #{rtuId,jdbcType=INTEGER},
+      </if>
+      <if test="mpId != null" >
+        #{mpId,jdbcType=SMALLINT},
+      </if>
+      <if test="ymd != null" >
+        #{ymd,jdbcType=INTEGER},
+      </if>
+      <if test="hms != null" >
+        #{hms,jdbcType=INTEGER},
+      </if>
+      <if test="totalFlow != null" >
+        #{totalFlow,jdbcType=DECIMAL},
+      </if>
+      <if test="totalPositiveFlow != null" >
+        #{totalPositiveFlow,jdbcType=DECIMAL},
+      </if>
+      <if test="totalNegativeFlow != null" >
+        #{totalNegativeFlow,jdbcType=DECIMAL},
+      </if>
+      <if test="dailyPositiveFlow != null" >
+        #{dailyPositiveFlow,jdbcType=DECIMAL},
+      </if>
+      <if test="dailyNegativeFlow != null" >
+        #{dailyNegativeFlow,jdbcType=DECIMAL},
+      </if>
+      <if test="dailyMaxVelocity != null" >
+        #{dailyMaxVelocity,jdbcType=DECIMAL},
+      </if>
+      <if test="dailyMaxVelocityTime != null" >
+        #{dailyMaxVelocityTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="batteryVoltage != null" >
+        #{batteryVoltage,jdbcType=DECIMAL},
+      </if>
+      <if test="valveStatus != null" >
+        #{valveStatus,jdbcType=TINYINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.nb.model.ke.NbDailyData" >
+    update nb_daily_data_200808
+    <set >
+      <if test="totalFlow != null" >
+        total_flow = #{totalFlow,jdbcType=DECIMAL},
+      </if>
+      <if test="totalPositiveFlow != null" >
+        total_positive_flow = #{totalPositiveFlow,jdbcType=DECIMAL},
+      </if>
+      <if test="totalNegativeFlow != null" >
+        total_negative_flow = #{totalNegativeFlow,jdbcType=DECIMAL},
+      </if>
+      <if test="dailyPositiveFlow != null" >
+        daily_positive_flow = #{dailyPositiveFlow,jdbcType=DECIMAL},
+      </if>
+      <if test="dailyNegativeFlow != null" >
+        daily_negative_flow = #{dailyNegativeFlow,jdbcType=DECIMAL},
+      </if>
+      <if test="dailyMaxVelocity != null" >
+        daily_max_velocity = #{dailyMaxVelocity,jdbcType=DECIMAL},
+      </if>
+      <if test="dailyMaxVelocityTime != null" >
+        daily_max_velocity_time = #{dailyMaxVelocityTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="batteryVoltage != null" >
+        battery_voltage = #{batteryVoltage,jdbcType=DECIMAL},
+      </if>
+      <if test="valveStatus != null" >
+        valve_status = #{valveStatus,jdbcType=TINYINT},
+      </if>
+    </set>
+    where rtu_id = #{rtuId,jdbcType=INTEGER}
+      and mp_id = #{mpId,jdbcType=SMALLINT}
+      and ymd = #{ymd,jdbcType=INTEGER}
+      and hms = #{hms,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.nb.model.ke.NbDailyData" >
+    update nb_daily_data_200808
+    set total_flow = #{totalFlow,jdbcType=DECIMAL},
+      total_positive_flow = #{totalPositiveFlow,jdbcType=DECIMAL},
+      total_negative_flow = #{totalNegativeFlow,jdbcType=DECIMAL},
+      daily_positive_flow = #{dailyPositiveFlow,jdbcType=DECIMAL},
+      daily_negative_flow = #{dailyNegativeFlow,jdbcType=DECIMAL},
+      daily_max_velocity = #{dailyMaxVelocity,jdbcType=DECIMAL},
+      daily_max_velocity_time = #{dailyMaxVelocityTime,jdbcType=TIMESTAMP},
+      battery_voltage = #{batteryVoltage,jdbcType=DECIMAL},
+      valve_status = #{valveStatus,jdbcType=TINYINT}
+    where rtu_id = #{rtuId,jdbcType=INTEGER}
+      and mp_id = #{mpId,jdbcType=SMALLINT}
+      and ymd = #{ymd,jdbcType=INTEGER}
+      and hms = #{hms,jdbcType=INTEGER}
+  </update>
+</mapper>

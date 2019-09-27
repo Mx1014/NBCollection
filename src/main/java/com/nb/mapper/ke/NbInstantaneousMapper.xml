@@ -1,36 +1,40 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.nb.mapper.NbBatteryMapper" >
-  <resultMap id="BaseResultMap" type="com.nb.model.NbBattery" >
+<mapper namespace="com.nb.mapper.ke.NbInstantaneousMapper" >
+  <resultMap id="BaseResultMap" type="com.nb.model.ke.NbInstantaneous" >
     <id column="rtu_id" property="rtuId" jdbcType="INTEGER" />
     <id column="mp_id" property="mpId" jdbcType="SMALLINT" />
     <id column="ymd" property="ymd" jdbcType="INTEGER" />
     <id column="hms" property="hms" jdbcType="INTEGER" />
-    <result column="battery_voltage" property="batteryVoltage" jdbcType="DECIMAL" />
+    <result column="total_flow" property="totalFlow" jdbcType="DECIMAL" />
   </resultMap>
   <sql id="Base_Column_List" >
-    rtu_id, mp_id, ymd, hms, battery_voltage
+    rtu_id, mp_id, ymd, hms, total_flow
   </sql>
-  <select id="getNbBattery" resultMap="BaseResultMap" parameterType="com.nb.model.NbBatteryKey" >
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="com.nb.model.ke.NbInstantaneousKey" >
     select 
     <include refid="Base_Column_List" />
-    from ${tableName}
+    from nb_instantaneous_200808
     where rtu_id = #{rtuId,jdbcType=INTEGER}
       and mp_id = #{mpId,jdbcType=SMALLINT}
       and ymd = #{ymd,jdbcType=INTEGER}
       and hms = #{hms,jdbcType=INTEGER}
   </select>
-  
-  <delete id="deleteNbBattery" parameterType="com.nb.model.NbBatteryKey" >
-    delete from ${tableName}
+  <delete id="deleteByPrimaryKey" parameterType="com.nb.model.ke.NbInstantaneousKey" >
+    delete from nb_instantaneous_200808
     where rtu_id = #{rtuId,jdbcType=INTEGER}
       and mp_id = #{mpId,jdbcType=SMALLINT}
       and ymd = #{ymd,jdbcType=INTEGER}
       and hms = #{hms,jdbcType=INTEGER}
   </delete>
-  
-  <insert id="insertNbBattery" parameterType="com.nb.model.NbBattery" >
-    insert into ${tableName}
+  <insert id="insert" parameterType="com.nb.model.ke.NbInstantaneous" >
+    insert into nb_instantaneous_200808 (rtu_id, mp_id, ymd, 
+      hms, total_flow)
+    values (#{rtuId,jdbcType=INTEGER}, #{mpId,jdbcType=SMALLINT}, #{ymd,jdbcType=INTEGER}, 
+      #{hms,jdbcType=INTEGER}, #{totalFlow,jdbcType=DECIMAL})
+  </insert>
+  <insert id="insertSelective" parameterType="com.nb.model.ke.NbInstantaneous" >
+    insert into nb_instantaneous_200808
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="rtuId != null" >
         rtu_id,
@@ -44,8 +48,8 @@
       <if test="hms != null" >
         hms,
       </if>
-      <if test="batteryVoltage != null" >
-        battery_voltage,
+      <if test="totalFlow != null" >
+        total_flow,
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
@@ -61,17 +65,16 @@
       <if test="hms != null" >
         #{hms,jdbcType=INTEGER},
       </if>
-      <if test="batteryVoltage != null" >
-        #{batteryVoltage,jdbcType=DECIMAL},
+      <if test="totalFlow != null" >
+        #{totalFlow,jdbcType=DECIMAL},
       </if>
     </trim>
   </insert>
- 
-  <update id="updateNbBattery" parameterType="com.nb.model.NbBattery" >
-    update ${tableName}
+  <update id="updateByPrimaryKeySelective" parameterType="com.nb.model.ke.NbInstantaneous" >
+    update nb_instantaneous_200808
     <set >
-      <if test="batteryVoltage != null" >
-        battery_voltage = #{batteryVoltage,jdbcType=DECIMAL},
+      <if test="totalFlow != null" >
+        total_flow = #{totalFlow,jdbcType=DECIMAL},
       </if>
     </set>
     where rtu_id = #{rtuId,jdbcType=INTEGER}
@@ -79,5 +82,12 @@
       and ymd = #{ymd,jdbcType=INTEGER}
       and hms = #{hms,jdbcType=INTEGER}
   </update>
-  
+  <update id="updateByPrimaryKey" parameterType="com.nb.model.ke.NbInstantaneous" >
+    update nb_instantaneous_200808
+    set total_flow = #{totalFlow,jdbcType=DECIMAL}
+    where rtu_id = #{rtuId,jdbcType=INTEGER}
+      and mp_id = #{mpId,jdbcType=SMALLINT}
+      and ymd = #{ymd,jdbcType=INTEGER}
+      and hms = #{hms,jdbcType=INTEGER}
+  </update>
 </mapper>
