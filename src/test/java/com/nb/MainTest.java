@@ -8,8 +8,9 @@
 */
 package com.nb;
 
-import static com.nb.utils.ConverterUtils.toLong;
-import static com.nb.utils.ConverterUtils.toStr;
+import static com.nb.utils.BytesUtils.getBytes;
+import static com.nb.utils.BytesUtils.getDouble;
+import static com.nb.utils.ConverterUtils.*;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteOrder;
@@ -22,6 +23,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
@@ -80,10 +82,28 @@ public class MainTest {
 	 */
 	public static void main(String[] args) throws UnsupportedEncodingException, ParseException {
 
-		SimpleDateFormat sdf = new SimpleDateFormat("ssmmHHddMMyy");
-
-		System.out.println(BytesUtils.str2Bcd(sdf.format(new Date())).length);
-
+		
+		
+		System.out.println(new StringBuilder("0869029032410846").reverse().toString());
+//        for (int i = 0; i < 12; i++) {
+//            System.out.println(new Random().nextInt(100));
+//		}
+//		System.out.println("yddata.dbo.eve" + 20190928 / 100);
+//		SimpleDateFormat sdf = new SimpleDateFormat("ssmmHHddMMyy");
+//		System.out.println(BytesUtils.bytesToHex(getBytes(toShort("9001"))));
+	 
+		
+//		String date = "190928";
+//		byte[] d = BytesUtils.invertArray(BytesUtils.str2Bcd(date));
+//		
+//		for (byte b : d) {
+//			System.out.print(b+"  ");
+//		}
+//System.out.println(DateUtils.formatTimesTampDate(CommFunc.parseKeTime("234512280")));
+//		System.out.println(BytesUtils.str2Bcd(sdf.format(new Date())).length);
+//		byte[] data10 = new byte[Constant.ONE];
+//		data10[0] = Constant.FRAME_START;
+//		System.out.println(toDouble(Constant.FRAME_START) / Constant.TEN);
 //		 System.out.println(toStr(toLong("0869029032410846")));;
 
 //		byte[] c = BytesUtils.hexStringToBytes("c0af");

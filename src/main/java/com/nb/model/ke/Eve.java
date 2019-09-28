@@ -63,8 +63,32 @@ public class Eve implements Serializable{
     private String charInfo;
     
     private String tableName;
+    
+    
 
-    /**
+    /** 
+	* <p>Title: </p> 
+	* <p>Description: </p> 
+	* @param classno
+	* @param typeno
+	* @param ymd
+	* @param hmsms
+	* @param memberId0
+	* @param memberId1
+	* @param charInfo 
+	*/
+	public Eve(Integer ymd, Integer hmsms, Integer memberId0, Integer memberId1) {
+		super();
+		this.classno = Constant.NB_ALARM;
+		this.ymd = ymd;
+		this.hmsms = hmsms;
+		this.memberId0 = memberId0;
+		this.memberId1 = memberId1;
+		this.memberId2 = -1;
+		this.tableName = "yddata.dbo.eve" + ymd / 100;
+	}
+
+	/**
 	 * @return the tableName
 	 */
 	public String getTableName() {

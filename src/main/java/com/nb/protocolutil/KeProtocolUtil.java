@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import org.springframework.stereotype.Component;
@@ -31,11 +33,13 @@ import com.nb.logger.LoggerUtil;
 import com.nb.mapper.CommonMapper;
 import com.nb.mapper.ke.NbWaterMeterMapper;
 import com.nb.model.SM4;
+import com.nb.model.ke.Eve;
 import com.nb.model.ke.KeMsg;
 import com.nb.model.ke.NbDailyData;
 import com.nb.model.ke.NbInstantaneous;
 import com.nb.model.ke.NbWaterMeter;
 import com.nb.utils.BytesUtils;
+import com.nb.utils.CommFunc;
 import com.nb.utils.Constant;
 import com.nb.utils.DateUtils;
 
@@ -104,32 +108,670 @@ public class KeProtocolUtil {
 			dataJson = parseC0A0(keMsg);
 			break;
 		case Constant.C0A1:
-
+			dataJson = parseC0A1(keMsg);
 			break;
 		case Constant.C0A2:
-
+			dataJson = parseC0A2(keMsg);
 			break;
 		case Constant.C0A3:
-
+			dataJson = parseC0A3(keMsg);
 			break;
 		case Constant.C0A4:
-
+			dataJson = parseC0A4(keMsg);
 			break;
 		case Constant.C0A5:
-
+			dataJson = parseC0A5(keMsg);
 			break;
 		case Constant.C0A6:
-
+			dataJson = parseC0A6(keMsg);
 			break;
 		case Constant.C0A7:
-
+			dataJson = parseC0A7(keMsg);
 			break;
 		default:
 			break;
 		}
 		return dataJson;
 	}
-	 
+	
+	
+	/** 
+	* 告警立即上报
+	* @Title: parseC0A1 
+	* @param @param keMsg
+	* @param @return
+	* @param @throws ParseException    设定文件 
+	* @return JSONObject    返回类型 
+	* @throws 
+	*/
+	private static JSONObject parseC0A1(KeMsg keMsg) throws ParseException {
+		/** 解密数据域 */
+		byte[] data = CommFunc.decryptDataECB(keMsg);
+		if (null == data) {
+			return null;
+		}
+
+		JSONObject rtnJson = new JSONObject();
+		ByteArrayInputStream bais = new ByteArrayInputStream(data);
+		DataInputStream dis = new DataInputStream(bais);
+		try {
+			/** 告警上报时间 */
+			byte[] data0 = new byte[Constant.SIX];
+			dis.read(data0);
+			String reportDate = BytesUtils.bcdToString(data0);
+
+			/** 大流量告警 */
+			byte data1 = dis.readByte();
+			/** 大流量告警发生值 */
+			byte[] data2 = new byte[Constant.TWO];
+			dis.read(data2);
+			short largeFlowValue = getShort(data2);
+			/** 大流量告警发生时间 */
+			byte[] data3 = new byte[Constant.SIX];
+			dis.read(data3);
+			String largeFlowDate = BytesUtils.bcdToString(data3);
+
+			/** 小流量告警 */
+			byte data4 = dis.readByte();
+			/** 小流量告警发生值 */
+			byte[] data5 = new byte[Constant.TWO];
+			dis.read(data5);
+			double smallFlowValue = toDouble(getShort(data5)) / Constant.TEN;
+			/** 小流量告警发生时间 */
+			byte[] data6 = new byte[Constant.SIX];
+			dis.read(data6);
+			String smallFlowDate = BytesUtils.bcdToString(data6);
+
+			/** 反向告警 */
+			byte data7 = dis.readByte();
+			/** 磁干扰告警 */
+			byte data8 = dis.readByte();
+			/** 电池低电压告警 */
+			byte data9 = dis.readByte();
+			/** 电池电压 */
+			byte data10 = dis.readByte();
+			double batteryVoltage = toDouble(data10) / Constant.TEN;
+
+			/** 数据被篡改 */
+			byte data11 = dis.readByte();
+			/** 内部错误 */
+			byte data12 = dis.readByte();
+			/** 远传模块分离 */
+			byte data13 = dis.readByte();
+			/** 备用字节 */
+			byte[] data14 = new byte[Constant.TEN];
+			dis.read(data14);
+
+			/** imei码 */
+			byte[] imeiBytes = new byte[Constant.EIGHT];
+			dis.read(imeiBytes);
+			String imeiCode = BytesUtils.bcdToString(imeiBytes);
+			/** 校验字节 */
+			byte[] crc = new byte[Constant.TWO];
+			dis.read(crc);
+
+			/** 获取待验证数据，并计算CRC值 */
+			byte[] crcData = new byte[Constant.NUM_49];
+			System.arraycopy(data, Constant.ZERO, crcData, Constant.ZERO, crcData.length);
+			String calcCrc = getReserveCrc(crcData);
+
+			/** 验证CRC与计算值 */
+			if (!bytesToHex(crc).equals(calcCrc)) {
+				LoggerUtil.logger(LogName.ERROR).error("设备{}crc校验失败", imeiCode);
+				return null;
+			}
+
+			if (!imeiCode.equals(keMsg.getImei())) {
+				LoggerUtil.logger(LogName.ERROR).error("设备{}imei不匹配，直接丢掉", imeiCode);
+				return null;
+			}
+			/** 存入redis */
+			Date reportBaseDate = CommFunc.parseKeTime(reportDate);
+			imeiCode = toStr(toLong(imeiCode));
+			NbWaterMeter nbWaterMeter = keProtocolUtil.nbWaterMeterMapper.getNbWaterMeter(imeiCode);
+
+			int ymd = toInt(DateUtils.formatDateByFormat(reportBaseDate, "yyyyMMdd"));
+			int hmsms = toInt(DateUtils.formatDateByFormat(reportBaseDate, "HHmmss")) * Constant.NUM_1000;
+			Eve eve = new Eve(ymd, hmsms, nbWaterMeter.getRtuId(), toInt(nbWaterMeter.getMpId()));
+			if (data1 == Constant.ONE) {
+				StringBuffer sb = new StringBuffer();
+				sb.append("发生时间：").append(DateUtils.formatTimesTampDate(CommFunc.parseKeTime(largeFlowDate)));
+				sb.append(",").append("发生值：").append(largeFlowValue).append("立方米");
+				eve.setCharInfo(sb.toString());
+				eve.setTypeno(Constant.ALARM_2001);
+				JedisUtils.lpush(Constant.ALARM_EVENT_QUEUE, JsonUtil.jsonObj2Sting(eve));
+			}
+
+			if (data4 == Constant.ONE) {
+				StringBuffer sb = new StringBuffer();
+				sb.append("发生时间：").append(DateUtils.formatTimesTampDate(CommFunc.parseKeTime(smallFlowDate)));
+				sb.append(",").append("发生值：").append(smallFlowValue).append("立方米");
+				eve.setCharInfo(sb.toString());
+				eve.setTypeno(Constant.ALARM_2002);
+				JedisUtils.lpush(Constant.ALARM_EVENT_QUEUE, JsonUtil.jsonObj2Sting(eve));
+			}
+
+			if (data7 == Constant.ONE) {
+				eve.setCharInfo("反流告警");
+				eve.setTypeno(Constant.ALARM_2003);
+				JedisUtils.lpush(Constant.ALARM_EVENT_QUEUE, JsonUtil.jsonObj2Sting(eve));
+			}
+
+			if (data8 == Constant.ONE) {
+				eve.setCharInfo("磁干扰告警");
+				eve.setTypeno(Constant.ALARM_2004);
+				JedisUtils.lpush(Constant.ALARM_EVENT_QUEUE, JsonUtil.jsonObj2Sting(eve));
+			}
+
+			if (data9 == Constant.ONE) {
+				eve.setCharInfo("电池低电压告警，电池电压：" + batteryVoltage);
+				eve.setTypeno(Constant.ALARM_2005);
+				JedisUtils.lpush(Constant.ALARM_EVENT_QUEUE, JsonUtil.jsonObj2Sting(eve));
+			}
+
+			if (data11 == Constant.ONE) {
+				eve.setCharInfo("数据被篡改");
+				eve.setTypeno(Constant.ALARM_2012);
+				JedisUtils.lpush(Constant.ALARM_EVENT_QUEUE, JsonUtil.jsonObj2Sting(eve));
+			}
+
+			if (data12 == Constant.ONE) {
+				eve.setCharInfo("内部错误");
+				eve.setTypeno(Constant.ALARM_2007);
+				JedisUtils.lpush(Constant.ALARM_EVENT_QUEUE, JsonUtil.jsonObj2Sting(eve));
+			}
+
+			if (data13 == Constant.ONE) {
+				eve.setCharInfo("远传模块分离");
+				eve.setTypeno(Constant.ALARM_2006);
+				JedisUtils.lpush(Constant.ALARM_EVENT_QUEUE, JsonUtil.jsonObj2Sting(eve));
+			}
+
+			rtnJson.put("control", "C0A1");
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+
+		return rtnJson;
+	}
+	
+	/** 
+	* 阀门控制响应 
+	* @Title: parseC0A2 
+	* @param @param keMsg
+	* @param @return
+	* @param @throws ParseException    设定文件 
+	* @return JSONObject    返回类型 
+	* @throws 
+	*/
+	private static JSONObject parseC0A2(KeMsg keMsg) throws ParseException {
+		/** 解密数据域 */
+		byte[] data = CommFunc.decryptDataECB(keMsg);
+		if (null == data) {
+			return null;
+		}
+
+		JSONObject rtnJson = new JSONObject();
+		ByteArrayInputStream bais = new ByteArrayInputStream(data);
+		DataInputStream dis = new DataInputStream(bais);
+		try {
+			/** mid */
+			byte[] data0 = new byte[Constant.TWO];
+			dis.read(data0);
+ 
+			/** 执行结果 */
+			byte data1 = dis.readByte();
+			
+			/** 备用字节 */
+			byte[] data2 = new byte[Constant.NINE];
+			dis.read(data2);
+
+			/** imei码 */
+			byte[] imeiBytes = new byte[Constant.EIGHT];
+			dis.read(imeiBytes);
+			String imeiCode = BytesUtils.bcdToString(imeiBytes);
+			/** 校验字节 */
+			byte[] crc = new byte[Constant.TWO];
+			dis.read(crc);
+
+			/** 获取待验证数据，并计算CRC值 */
+			byte[] crcData = new byte[Constant.NUM_18];
+			System.arraycopy(data, Constant.ZERO, crcData, Constant.ZERO, crcData.length);
+			String calcCrc = getReserveCrc(crcData);
+
+			/** 验证CRC与计算值 */
+			if (!bytesToHex(crc).equals(calcCrc)) {
+				LoggerUtil.logger(LogName.ERROR).error("设备{}crc校验失败", imeiCode);
+				return null;
+			}
+
+			if (!imeiCode.equals(keMsg.getImei())) {
+				LoggerUtil.logger(LogName.ERROR).error("设备{}imei不匹配，直接丢掉", imeiCode);
+				return null;
+			}
+			
+			rtnJson.put("control", "C0A2");
+			rtnJson.put("result", data1);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+
+		return rtnJson;
+	}
+	
+	/** 
+	* 限值设置响应
+	* @Title: parseC0A3 
+	* @param @param keMsg
+	* @param @return
+	* @param @throws ParseException    设定文件 
+	* @return JSONObject    返回类型 
+	* @throws 
+	*/
+	private static JSONObject parseC0A3(KeMsg keMsg) throws ParseException {
+		/** 解密数据域 */
+		byte[] data = CommFunc.decryptDataECB(keMsg);
+		if (null == data) {
+			return null;
+		}
+
+		JSONObject rtnJson = new JSONObject();
+		ByteArrayInputStream bais = new ByteArrayInputStream(data);
+		DataInputStream dis = new DataInputStream(bais);
+		try {
+			/** mid */
+			byte[] data0 = new byte[Constant.TWO];
+			dis.read(data0);
+ 
+			/** 执行结果 */
+			byte data1 = dis.readByte();
+			
+			/** 备用字节 */
+			byte[] data2 = new byte[Constant.NINE];
+			dis.read(data2);
+
+			/** imei码 */
+			byte[] imeiBytes = new byte[Constant.EIGHT];
+			dis.read(imeiBytes);
+			String imeiCode = BytesUtils.bcdToString(imeiBytes);
+			/** 校验字节 */
+			byte[] crc = new byte[Constant.TWO];
+			dis.read(crc);
+
+			/** 获取待验证数据，并计算CRC值 */
+			byte[] crcData = new byte[Constant.NUM_18];
+			System.arraycopy(data, Constant.ZERO, crcData, Constant.ZERO, crcData.length);
+			String calcCrc = getReserveCrc(crcData);
+
+			/** 验证CRC与计算值 */
+			if (!bytesToHex(crc).equals(calcCrc)) {
+				LoggerUtil.logger(LogName.ERROR).error("设备{}crc校验失败", imeiCode);
+				return null;
+			}
+
+			if (!imeiCode.equals(keMsg.getImei())) {
+				LoggerUtil.logger(LogName.ERROR).error("设备{}imei不匹配，直接丢掉", imeiCode);
+				return null;
+			}
+			
+			rtnJson.put("control", "C0A3");
+			rtnJson.put("result", data1);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+
+		return rtnJson;
+	}
+	
+	/** 
+	* 召历史数据响应
+	* @Title: parseC0A4 
+	* @param @param keMsg
+	* @param @return
+	* @param @throws ParseException    设定文件 
+	* @return JSONObject    返回类型 
+	* @throws 
+	*/
+	private static JSONObject parseC0A4(KeMsg keMsg) throws ParseException {
+		/** 解密数据域 */
+		byte[] data = CommFunc.decryptDataECB(keMsg);
+		if (null == data) {
+			return null;
+		}
+
+		JSONObject rtnJson = new JSONObject();
+		ByteArrayInputStream bais = new ByteArrayInputStream(data);
+		DataInputStream dis = new DataInputStream(bais);
+		try {
+			/** mid */
+			byte[] data0 = new byte[Constant.TWO];
+			dis.read(data0);
+ 
+			/** 执行结果 */
+			byte data1 = dis.readByte();
+			
+			/** 备用字节 */
+			byte[] data2 = new byte[Constant.NINE];
+			dis.read(data2);
+
+			/** imei码 */
+			byte[] imeiBytes = new byte[Constant.EIGHT];
+			dis.read(imeiBytes);
+			String imeiCode = BytesUtils.bcdToString(imeiBytes);
+			/** 数据点数 */
+			byte data4 = dis.readByte();
+			byte[] data5 = new byte[Constant.NUM_130 * data4];
+			dis.read(data5);
+			
+			/** 校验字节 */
+			byte[] crc = new byte[Constant.TWO];
+			dis.read(crc);
+
+			/** 获取待验证数据，并计算CRC值 */
+			byte[] crcData = new byte[Constant.NUM_18];
+			System.arraycopy(data, Constant.ZERO, crcData, Constant.ZERO, crcData.length);
+			String calcCrc = getReserveCrc(crcData);
+
+			/** 验证CRC与计算值 */
+			if (!bytesToHex(crc).equals(calcCrc)) {
+				LoggerUtil.logger(LogName.ERROR).error("设备{}crc校验失败", imeiCode);
+				return null;
+			}
+
+			if (!imeiCode.equals(keMsg.getImei())) {
+				LoggerUtil.logger(LogName.ERROR).error("设备{}imei不匹配，直接丢掉", imeiCode);
+				return null;
+			}
+			saveRecallData(imeiCode, data4, data5);
+			rtnJson.put("control", "C0A4");
+			rtnJson.put("result", data1);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+
+		return rtnJson;
+	}
+	
+	/** 
+	* 保存补招数据 
+	* @Title: saveRecallData 
+	* @param @param count
+	* @param @param data    设定文件 
+	* @return void    返回类型 
+	* @throws 
+	*/
+	private static void saveRecallData(String imei, byte count, byte[] data) {
+		if (count != data.length / Constant.NUM_130) {
+			return;
+		}
+		ByteArrayInputStream bais = new ByteArrayInputStream(data);
+		DataInputStream dis = new DataInputStream(bais);
+		try {
+			for (int i = 0; i < count; i++) {
+				/** 日冻结时间 */
+				byte[] data0 = new byte[Constant.SIX];
+				dis.read(data0);
+				String freezeDate = BytesUtils.bcdToString(data0);
+
+				/** 日冻结表底 */
+				byte[] data1 = new byte[Constant.FOUR];
+				dis.read(data1);
+				double totalFlow = toDouble(getInt(invertArray(data1))) / Constant.NUM_1000;
+
+				/** 当前正向累计流量 */
+				byte[] data2 = new byte[Constant.FOUR];
+				dis.read(data2);
+				double totalPositiveFlow = toDouble(getInt(invertArray(data2))) / Constant.NUM_1000;
+
+				/** 当前反向累计流量 */
+				byte[] data3 = new byte[Constant.FOUR];
+				dis.read(data3);
+				double totalNegativeFlow = toDouble(getInt(invertArray(data3))) / Constant.NUM_1000;
+
+				/** 冻结前一日正向累计流量 */
+				byte[] data4 = new byte[Constant.FOUR];
+				dis.read(data4);
+				double dailyPositiveFlow = toDouble(getInt(invertArray(data4))) / Constant.NUM_1000;
+
+				/** 冻结前一日反向累计流量 */
+				byte[] data5 = new byte[Constant.FOUR];
+				dis.read(data5);
+				double dailyNegativeFlow = toDouble(getInt(invertArray(data5))) / Constant.NUM_1000;
+
+				/** 冻结前一日瞬时量 */
+				byte[] data6 = new byte[Constant.NUM_96];
+				dis.read(data6);
+
+				/** 前一日最大流速 */
+				byte[] data7 = new byte[Constant.TWO];
+				dis.read(data7);
+				double dailyMaxVelocity = toDouble(getShort(invertArray(data7))) / Constant.NUM_1000;
+
+				/** 前一日最大流速发生时间 */
+				byte[] data8 = new byte[Constant.SIX];
+				dis.read(data8);
+				String dailyMaxVelocityTime = BytesUtils.bcdToString(data8);
+				
+				imei = toStr(toLong(imei));
+				NbWaterMeter nbWaterMeter = keProtocolUtil.nbWaterMeterMapper.getNbWaterMeter(imei);
+				saveDailyData(nbWaterMeter, freezeDate, totalFlow, totalPositiveFlow, totalNegativeFlow, dailyPositiveFlow,
+						dailyNegativeFlow, dailyMaxVelocity, dailyMaxVelocityTime, null, null);
+				
+				saveInstantaneousData(nbWaterMeter, freezeDate, data6);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			LoggerUtil.logger(LogName.ERROR).error("补招数据解析异常，设备：" + imei+",数据："+ bytesToHex(data));
+		}
+	}
+	
+	/** 
+	* 设置主站参数应答 
+	* @Title: parseC0A5 
+	* @param @param keMsg
+	* @param @return
+	* @param @throws ParseException    设定文件 
+	* @return JSONObject    返回类型 
+	* @throws 
+	*/
+	private static JSONObject parseC0A5(KeMsg keMsg) throws ParseException {
+		/** 解密数据域 */
+		byte[] data = CommFunc.decryptDataECB(keMsg);
+		if (null == data) {
+			return null;
+		}
+
+		JSONObject rtnJson = new JSONObject();
+		ByteArrayInputStream bais = new ByteArrayInputStream(data);
+		DataInputStream dis = new DataInputStream(bais);
+		try {
+			/** mid */
+			byte[] data0 = new byte[Constant.TWO];
+			dis.read(data0);
+ 
+			/** 执行结果 */
+			byte data1 = dis.readByte();
+			
+			/** 备用字节 */
+			byte[] data2 = new byte[Constant.NINE];
+			dis.read(data2);
+
+			/** imei码 */
+			byte[] imeiBytes = new byte[Constant.EIGHT];
+			dis.read(imeiBytes);
+			String imeiCode = BytesUtils.bcdToString(imeiBytes);
+			/** 校验字节 */
+			byte[] crc = new byte[Constant.TWO];
+			dis.read(crc);
+
+			/** 获取待验证数据，并计算CRC值 */
+			byte[] crcData = new byte[Constant.NUM_18];
+			System.arraycopy(data, Constant.ZERO, crcData, Constant.ZERO, crcData.length);
+			String calcCrc = getReserveCrc(crcData);
+
+			/** 验证CRC与计算值 */
+			if (!bytesToHex(crc).equals(calcCrc)) {
+				LoggerUtil.logger(LogName.ERROR).error("设备{}crc校验失败", imeiCode);
+				return null;
+			}
+
+			if (!imeiCode.equals(keMsg.getImei())) {
+				LoggerUtil.logger(LogName.ERROR).error("设备{}imei不匹配，直接丢掉", imeiCode);
+				return null;
+			}
+			
+			rtnJson.put("control", "C0A5");
+			rtnJson.put("result", data1);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+
+		return rtnJson;
+	}
+	
+	/** 
+	* 更新设备密钥响应
+	* @Title: parseC0A6 
+	* @param @param keMsg
+	* @param @return
+	* @param @throws ParseException    设定文件 
+	* @return JSONObject    返回类型 
+	* @throws 
+	*/
+	private static JSONObject parseC0A6(KeMsg keMsg) throws ParseException {
+		/** 解密数据域 */
+		byte[] data = CommFunc.decryptDataECB(keMsg);
+		if (null == data) {
+			return null;
+		}
+
+		JSONObject rtnJson = new JSONObject();
+		ByteArrayInputStream bais = new ByteArrayInputStream(data);
+		DataInputStream dis = new DataInputStream(bais);
+		try {
+			/** mid */
+			byte[] data0 = new byte[Constant.TWO];
+			dis.read(data0);
+			/** 密钥 */
+			byte[] data1 = new byte[Constant.NUM_16];
+			dis.read(data1);
+
+			/** 母钥版本 */
+			byte data2 = dis.readByte();
+ 
+			/** 执行结果 */
+			byte data3 = dis.readByte();
+			
+			/** 备用字节 */
+			byte[] data4 = new byte[Constant.NINE];
+			dis.read(data4);
+
+			/** imei码 */
+			byte[] imeiBytes = new byte[Constant.EIGHT];
+			dis.read(imeiBytes);
+			String imeiCode = BytesUtils.bcdToString(imeiBytes);
+			/** 校验字节 */
+			byte[] crc = new byte[Constant.TWO];
+			dis.read(crc);
+
+			/** 获取待验证数据，并计算CRC值 */
+			byte[] crcData = new byte[Constant.NUM_37];
+			System.arraycopy(data, Constant.ZERO, crcData, Constant.ZERO, crcData.length);
+			String calcCrc = getReserveCrc(crcData);
+
+			/** 验证CRC与计算值 */
+			if (!bytesToHex(crc).equals(calcCrc)) {
+				LoggerUtil.logger(LogName.ERROR).error("设备{}crc校验失败", imeiCode);
+				return null;
+			}
+
+			if (!imeiCode.equals(keMsg.getImei())) {
+				LoggerUtil.logger(LogName.ERROR).error("设备{}imei不匹配，直接丢掉", imeiCode);
+				return null;
+			}
+			
+			rtnJson.put("control", "C0A6");
+			rtnJson.put("result", data1);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+
+		return rtnJson;
+	}
+	
+	/** 
+	*  召母钥版本响应 
+	* @Title: parseC0A7 
+	* @param @param keMsg
+	* @param @return
+	* @param @throws ParseException    设定文件 
+	* @return JSONObject    返回类型 
+	* @throws 
+	*/
+	private static JSONObject parseC0A7(KeMsg keMsg) throws ParseException {
+		/** 解密数据域 */
+		byte[] data = keMsg.getData();
+		if (null == data) {
+			return null;
+		}
+
+		JSONObject rtnJson = new JSONObject();
+		ByteArrayInputStream bais = new ByteArrayInputStream(data);
+		DataInputStream dis = new DataInputStream(bais);
+		try {
+			/** mid */
+			byte[] data0 = new byte[Constant.TWO];
+			dis.read(data0);
+
+			/** 母钥版本 */
+			byte data1 = dis.readByte();
+ 
+			/** 备用字节 */
+			byte[] data4 = new byte[Constant.NINE];
+			dis.read(data4);
+
+			/** imei码 */
+			byte[] imeiBytes = new byte[Constant.EIGHT];
+			dis.read(imeiBytes);
+			String imeiCode = BytesUtils.bcdToString(imeiBytes);
+			/** 校验字节 */
+			byte[] crc = new byte[Constant.TWO];
+			dis.read(crc);
+
+			/** 获取待验证数据，并计算CRC值 */
+			byte[] crcData = new byte[Constant.NUM_37];
+			System.arraycopy(data, Constant.ZERO, crcData, Constant.ZERO, crcData.length);
+			String calcCrc = getReserveCrc(crcData);
+
+			/** 验证CRC与计算值 */
+			if (!bytesToHex(crc).equals(calcCrc)) {
+				LoggerUtil.logger(LogName.ERROR).error("设备{}crc校验失败", imeiCode);
+				return null;
+			}
+
+			if (!imeiCode.equals(keMsg.getImei())) {
+				LoggerUtil.logger(LogName.ERROR).error("设备{}imei不匹配，直接丢掉", imeiCode);
+				return null;
+			}
+			
+			rtnJson.put("control", "C0A6");
+			rtnJson.put("result", data1);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+
+		return rtnJson;
+	}
+	
+	
+	
 	/**
 	 * @throws ParseException  
 	* 解析C0A0帧
@@ -141,15 +783,8 @@ public class KeProtocolUtil {
 	*/
 	private static JSONObject parseC0A0(KeMsg keMsg) throws ParseException {
 		JSONObject rtnJson = new JSONObject();
-		String imei = String.format("%016d", toLong(keMsg.getImei()));
-
-		String secretKey = JedisUtils.get(imei);
-		SM4Utils sm4 = new SM4Utils();
-		sm4.secretKey = secretKey;
-		sm4.hexString = false;
-
 		/** 解密数据域 */
-		byte[] data = sm4.decryptDataECB(keMsg.getData());
+		byte[] data = CommFunc.decryptDataECB(keMsg);
 		if (null == data) {
 			return null;
 		}
@@ -164,27 +799,27 @@ public class KeProtocolUtil {
 			/** 日冻结表底 */
 			byte[] data1 = new byte[Constant.FOUR];
 			dis.read(data1);
-			double totalFlow = getDouble(invertArray(data1)) / Constant.NUM_1000;
+			double totalFlow = toDouble(getInt(invertArray(data1))) / Constant.NUM_1000;
 
 			/** 当前正向累计流量 */
 			byte[] data2 = new byte[Constant.FOUR];
 			dis.read(data2);
-			double totalPositiveFlow = getDouble(invertArray(data2)) / Constant.NUM_1000;
+			double totalPositiveFlow = toDouble(getInt(invertArray(data2))) / Constant.NUM_1000;
 
 			/** 当前反向累计流量 */
 			byte[] data3 = new byte[Constant.FOUR];
 			dis.read(data3);
-			double totalNegativeFlow = getDouble(invertArray(data3)) / Constant.NUM_1000;
+			double totalNegativeFlow = toDouble(getInt(invertArray(data3))) / Constant.NUM_1000;
 
 			/** 冻结前一日正向累计流量 */
 			byte[] data4 = new byte[Constant.FOUR];
 			dis.read(data4);
-			double dailyPositiveFlow = getDouble(invertArray(data4)) / Constant.NUM_1000;
+			double dailyPositiveFlow = toDouble(getInt(invertArray(data4))) / Constant.NUM_1000;
 
 			/** 冻结前一日反向累计流量 */
 			byte[] data5 = new byte[Constant.FOUR];
 			dis.read(data5);
-			double dailyNegativeFlow = getDouble(invertArray(data5)) / Constant.NUM_1000;
+			double dailyNegativeFlow = toDouble(getInt(invertArray(data5)))/ Constant.NUM_1000;
 
 			/** 冻结前一日瞬时量 */
 			byte[] data6 = new byte[Constant.NUM_96];
@@ -199,9 +834,8 @@ public class KeProtocolUtil {
 			dis.read(data8);
 
 			/** 电池电压 */
-			byte[] data9 = new byte[Constant.ONE];
-			dis.read(data9);
-			double batteryVoltage = getDouble(data9) / Constant.TEN;
+			byte data9 = dis.readByte();
+ 			double batteryVoltage = toDouble(data9) / Constant.TEN;
 
 			/** 版本号 */
 			byte[] data10 = new byte[Constant.FIVE];
@@ -214,7 +848,7 @@ public class KeProtocolUtil {
 			/** 前一日最大流速 */
 			byte[] data12 = new byte[Constant.TWO];
 			dis.read(data12);
-			double dailyMaxVelocity = getDouble(invertArray(data12)) / Constant.NUM_1000;
+			double dailyMaxVelocity = toDouble(getShort(invertArray(data12))) / Constant.NUM_1000;
 
 			/** 前一日最大流速发生时间 */
 			byte[] data13 = new byte[Constant.SIX];
@@ -239,16 +873,15 @@ public class KeProtocolUtil {
 			/** 小流量告警阀值 */
 			byte[] data18 = new byte[Constant.TWO];
 			dis.read(data18);
-			double smallFlowAlarmThreshold = getDouble(invertArray(data12)) / Constant.TEN;
+			double smallFlowAlarmThreshold = toDouble(getShort(invertArray(data12))) / Constant.TEN;
 			/** 小流量告警持续时间 */
 			byte smallFlowAlarmThresholdTime = dis.readByte();
 			/** 长时间用水阀值 */
 			byte longTimeUseWaterThresholdTime = dis.readByte();
 
 			/** 电池低电压告警阀值 */
-			byte[] data21 = new byte[Constant.ONE];
-			dis.read(data21);
-			double lowVoltageAlarmThreshold = getDouble(data21) / Constant.TEN;
+			byte data21 = dis.readByte();
+ 			double lowVoltageAlarmThreshold = toDouble(data21) / Constant.TEN;
 			/** 高压告警阀值 */
 			byte data22 = dis.readByte();
 			/** 低压告警阀值 */
@@ -274,12 +907,12 @@ public class KeProtocolUtil {
 
 			/** 验证CRC与计算值 */
 			if (!bytesToHex(crc).equals(calcCrc)) {
-				LoggerUtil.logger(LogName.ERROR).error("设备{}crc校验失败", imei);
+				LoggerUtil.logger(LogName.ERROR).error("设备{}crc校验失败", imeiCode);
 				return null;
 			}
 
 			if (!imeiCode.equals(keMsg.getImei())) {
-				LoggerUtil.logger(LogName.ERROR).error("设备{}imei不匹配，直接丢掉", imei);
+				LoggerUtil.logger(LogName.ERROR).error("设备{}imei不匹配，直接丢掉", imeiCode);
 				return null;
 			}
 
@@ -296,9 +929,7 @@ public class KeProtocolUtil {
 			nbWaterMeter.setSmallFlowThreshold(smallFlowAlarmThreshold);
 			nbWaterMeter.setSmallFlowDuration(toInt(smallFlowAlarmThresholdTime));
 
-			reportBaseTime = reportBaseTime.substring(0, 10) + "20" + reportBaseTime.substring(10);
-			SimpleDateFormat sdf = new SimpleDateFormat("ssmmHHddMMyyyy");
-			Date reportBaseDate = sdf.parse(freezeDate);
+			Date reportBaseDate = CommFunc.parseKeTime(reportBaseTime);
 			nbWaterMeter.setReportBaseTime(DateUtils.formatTimesTampDate(reportBaseDate));
 			nbWaterMeter.setReportIntervalTime(toInt(data15));
 			nbWaterMeter.setValveStatus(valveStatus);
@@ -337,24 +968,21 @@ public class KeProtocolUtil {
 	* @return void    返回类型 
 	* @throws 
 	*/
-	private static void saveDailyData(NbWaterMeter nbWaterMeter, String freezeDate, double totalFlow,
-			double totalPositiveFlow, double totalNegativeFlow, double dailyPositiveFlow, double dailyNegativeFlow,
-			double dailyMaxVelocity, String dailyMaxVelocityTime, double batteryVoltage, byte valveStatus)
+	private static void saveDailyData(NbWaterMeter nbWaterMeter, String freezeDate, Double totalFlow,
+			Double totalPositiveFlow, Double totalNegativeFlow, Double dailyPositiveFlow, Double dailyNegativeFlow,
+			Double dailyMaxVelocity, String dailyMaxVelocityTime, Double batteryVoltage, Byte valveStatus)
 			throws ParseException {
 
 		NbDailyData nbdailyData = new NbDailyData(nbWaterMeter.getRtuId(), nbWaterMeter.getMpId(), totalFlow,
 				totalPositiveFlow, totalNegativeFlow, dailyPositiveFlow, dailyNegativeFlow, dailyMaxVelocity,
 				batteryVoltage, valveStatus);
-		freezeDate = freezeDate.substring(0, 10) + "20" + freezeDate.substring(10);
-		SimpleDateFormat sdf = new SimpleDateFormat("ssmmHHddMMyyyy");
-		Date reprotDate = sdf.parse(freezeDate);
+		Date reprotDate = CommFunc.parseKeTime(freezeDate);
 		int ymd = toInt(DateUtils.formatDateByFormat(reprotDate, "yyyyMMdd"));
 		nbdailyData.setYmd(ymd);
 		nbdailyData.setHms(toInt(DateUtils.formatDateByFormat(reprotDate, "HHmmss")));
 		nbdailyData.setTableName(toStr(ymd / Constant.NUM_100));		
 		
-		dailyMaxVelocityTime = dailyMaxVelocityTime.substring(0, 10) + "20" + dailyMaxVelocityTime.substring(10);
-		Date maxVelocityTime = sdf.parse(freezeDate);
+		Date maxVelocityTime = CommFunc.parseKeTime(dailyMaxVelocityTime);
 		nbdailyData.setDailyMaxVelocityTime(DateUtils.formatTimesTampDate(maxVelocityTime));
 
 		JedisUtils.lpush(Constant.HISTORY_DAILY_QUEUE, JsonUtil.jsonObj2Sting(nbdailyData));
@@ -373,9 +1001,7 @@ public class KeProtocolUtil {
 	*/
 	private static void saveInstantaneousData(NbWaterMeter nbWaterMeter, String freezeDate, byte[] data)
 			throws ParseException, IOException {
-		freezeDate = freezeDate.substring(0, 10) + "20" + freezeDate.substring(10);
-		SimpleDateFormat sdf = new SimpleDateFormat("ssmmHHddMMyyyy");
-		Date reprotDate = sdf.parse(freezeDate);
+		Date reprotDate = CommFunc.parseKeTime(freezeDate);
 		int ymd = toInt(DateUtils.formatDateByFormat(reprotDate, "yyyyMMdd"));
 
 		Calendar cal = Calendar.getInstance();
@@ -484,7 +1110,7 @@ public class KeProtocolUtil {
 	}
 
 	/** 
-	* 组建40AF帧
+	* 组建40AF帧 响应设备请求更新密钥
 	* @Title: make40AFFrame 
 	* @param @param imei
 	* @param @return    设定文件 
@@ -551,7 +1177,7 @@ public class KeProtocolUtil {
 	}
 	
 	/** 
-	* 组建40A0帧 
+	* 组建40A0帧 响应数据上报
 	* @Title: make40A0Frame 
 	* @param @param imei
 	* @param @return    设定文件 
@@ -594,11 +1220,128 @@ public class KeProtocolUtil {
 			dataDos.write(hexStringToBytes(getReserveCrc(dataBos.toByteArray())));
 			
 			/** 使用密钥加密 */
-			String secretKey = JedisUtils.get(imei);
-			SM4Utils sm4 = new SM4Utils();
-			sm4.secretKey = secretKey;
-			sm4.hexString = false;
-			byte[] encryptedData = sm4.encryptDataECB(dataBos.toByteArray());
+			byte[] encryptedData = CommFunc.encryptDataECB(imei, dataBos.toByteArray());
+		
+			/** 数据长度 */
+			byte[] lenght = BytesUtils.getBytes((short) encryptedData.length);
+			dos.write(BytesUtils.invertArray(lenght));
+			/** 数据（加密） */
+			dos.write(encryptedData);
+
+			dos.write(hexStringToBytes(getReserveCrc(bos.toByteArray())));
+			dos.writeByte(0x16);
+			dataFrame = BytesUtils.bytesToHex(bos.toByteArray());
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return dataFrame;
+	}
+	
+	/** 
+	* 响应告警立即上报
+	* @Title: make40A1Frame 
+	* @param @param imei
+	* @param @return    设定文件 
+	* @return String    返回类型 
+	* @throws 
+	*/
+	public static String make40A1Frame(String imei) {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		DataOutputStream dos = new DataOutputStream(bos);
+		String dataFrame = null;
+		imei = String.format("%016d", toLong(imei));
+		try {
+			/** 起始字符 */
+			dos.writeByte(0x68);
+			/** 规约类型 */
+			dos.writeByte(0x20);
+			/** 消息属性 */
+			dos.writeByte(0x01);
+			/** imei */
+			byte[] imeiBcd = BytesUtils.str2Bcd(imei);
+			dos.write(imeiBcd);
+			/** 控制码 */
+			dos.writeShort(0x40A1);
+
+			ByteArrayOutputStream dataBos = new ByteArrayOutputStream();
+			DataOutputStream dataDos = new DataOutputStream(dataBos);
+			/** 处理结果 */
+			dataDos.write(0x00);
+			/** 备用字节 */
+			byte[] back = new byte[Constant.TEN];
+			dataDos.write(back);
+			
+			/** imei */
+			dataDos.write(imeiBcd);
+			/** crc校验 */
+			dataDos.write(hexStringToBytes(getReserveCrc(dataBos.toByteArray())));
+			
+			/** 使用密钥加密 */
+			byte[] encryptedData = CommFunc.encryptDataECB(imei, dataBos.toByteArray());
+		
+			/** 数据长度 */
+			byte[] lenght = BytesUtils.getBytes((short) encryptedData.length);
+			dos.write(BytesUtils.invertArray(lenght));
+			/** 数据（加密） */
+			dos.write(encryptedData);
+
+			dos.write(hexStringToBytes(getReserveCrc(bos.toByteArray())));
+			dos.writeByte(0x16);
+			dataFrame = BytesUtils.bytesToHex(bos.toByteArray());
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return dataFrame;
+	}
+	
+	/** 
+	* 组建控制开关阀  
+	* @Title: make40A2Frame 
+	* @param @param imei
+	* @param @param cmd
+	* @param @return    设定文件 
+	* @return String    返回类型 
+	* @throws 
+	*/
+	public static String make40A2Frame(String imei, byte cmd) {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		DataOutputStream dos = new DataOutputStream(bos);
+		String dataFrame = null;
+		imei = String.format("%016d", toLong(imei));
+		try {
+			/** 起始字符 */
+			dos.writeByte(0x68);
+			/** 规约类型 */
+			dos.writeByte(0x20);
+			/** 消息属性 */
+			dos.writeByte(0x01);
+			/** imei */
+			byte[] imeiBcd = BytesUtils.str2Bcd(imei);
+			dos.write(imeiBcd);
+			/** 控制码 */
+			dos.writeShort(0x40A2);
+
+			ByteArrayOutputStream dataBos = new ByteArrayOutputStream();
+			DataOutputStream dataDos = new DataOutputStream(dataBos);
+			/** Mid 帧id */
+			byte[] mid = new byte[Constant.TWO];
+			mid = getBytes(toShort(new Random().nextInt(Constant.NUM_1000)));
+			dataDos.write(mid);
+			/** 阀门命令 */
+			dataDos.write(cmd);
+
+ 			/** 备用字节 */
+			byte[] back = new byte[Constant.NINE];
+			dataDos.write(back);
+			/** imei */
+			dataDos.write(imeiBcd);
+			/** crc校验 */
+			dataDos.write(hexStringToBytes(getReserveCrc(dataBos.toByteArray())));
+			
+			/** 使用密钥加密 */
+			byte[] encryptedData = CommFunc.encryptDataECB(imei, dataBos.toByteArray());
 		
 			/** 数据长度 */
 			byte[] lenght = BytesUtils.getBytes((short) encryptedData.length);
@@ -616,6 +1359,356 @@ public class KeProtocolUtil {
 		return dataFrame;
 	}
 
+	/** 
+	* 限值设置 
+	* @Title: make40A3Frame 
+	* @param @param imei
+	* @param @param param
+	* @param @return    设定文件 
+	* @return String    返回类型 
+	* @throws 
+	*/
+	public static String make40A3Frame(String imei, JSONObject param) {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		DataOutputStream dos = new DataOutputStream(bos);
+		String dataFrame = null;
+		imei = String.format("%016d", toLong(imei));
+		try {
+			/** 起始字符 */
+			dos.writeByte(0x68);
+			/** 规约类型 */
+			dos.writeByte(0x20);
+			/** 消息属性 */
+			dos.writeByte(0x01);
+			/** imei */
+			byte[] imeiBcd = BytesUtils.str2Bcd(imei);
+			dos.write(imeiBcd);
+			/** 控制码 */
+			dos.writeShort(0x40A3);
+
+			ByteArrayOutputStream dataBos = new ByteArrayOutputStream();
+			DataOutputStream dataDos = new DataOutputStream(dataBos);
+			/** Mid 帧id */
+			byte[] mid = new byte[Constant.TWO];
+			mid = getBytes(toShort(new Random().nextInt(Constant.NUM_1000)));
+			dataDos.write(mid);
+			/** 大流量报警阀值 */
+			byte[] data1 = invertArray(getBytes(param.getShort("largeFlowAlramThreshold")));
+			dataDos.write(data1);
+			/** 大流量持续时间 */
+			dataDos.write(param.getByte("largeFlowAlramTime"));
+			/** 小流量报警阀值 */
+			byte[] data3 = invertArray(getBytes(param.getShort("smallFlowAlramThreshold")));
+			dataDos.write(data3);
+			/** 小流量持续时间 */
+			dataDos.write(param.getByte("smallFlowAlramTime"));
+			/** 长时间用水时间阀值 */
+			dataDos.write(param.getByte("longTimeUsedAlramTime"));
+			/** 上报基准时间 */
+			SimpleDateFormat sdf = new SimpleDateFormat("ssmmHHddMMyy");
+			Date reportBaseTime = DateUtils.parseTimesTampDate(param.getString("reportBaseTime"));
+			dataDos.write(BytesUtils.str2Bcd(sdf.format(reportBaseTime)));
+			/** 上报时间间隔 */
+			dataDos.write(param.getByte("reportingInterval"));
+
+			/** 电池低电压告警阀值 传整数 实际*10 */
+			dataDos.write(param.getByte("lowVoltageAlarmThreshold"));
+			/** 高压告警阀值 */
+			dataDos.write(param.getByte("highPressureAlarmThreshold"));
+			/** 低压告警阀值 */
+			dataDos.write(param.getByte("lowPressureAlarmThreshold"));
+
+			/** 备用字节 */
+			byte[] back = new byte[Constant.TEN];
+			dataDos.write(back);
+			/** imei */
+			dataDos.write(imeiBcd);
+			/** crc校验 */
+			dataDos.write(hexStringToBytes(getReserveCrc(dataBos.toByteArray())));
+
+			/** 使用密钥加密 */
+			byte[] encryptedData = CommFunc.encryptDataECB(imei, dataBos.toByteArray());
+
+			/** 数据长度 */
+			byte[] lenght = BytesUtils.getBytes((short) encryptedData.length);
+			dos.write(BytesUtils.invertArray(lenght));
+			/** 数据（加密） */
+			dos.write(encryptedData);
+
+			dos.write(hexStringToBytes(getReserveCrc(bos.toByteArray())));
+			dos.writeByte(0x16);
+			dataFrame = BytesUtils.bytesToHex(bos.toByteArray());
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return dataFrame;
+	}
+	
+	/** 
+	* 召历史数据 
+	* @Title: make40A4Frame 
+	* @param @param imei
+	* @param @param param
+	* @param @return    设定文件 
+	* @return String    返回类型 
+	* @throws 
+	*/
+	public static String make40A4Frame(String imei, JSONObject param) {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		DataOutputStream dos = new DataOutputStream(bos);
+		String dataFrame = null;
+		imei = String.format("%016d", toLong(imei));
+		try {
+			/** 起始字符 */
+			dos.writeByte(0x68);
+			/** 规约类型 */
+			dos.writeByte(0x20);
+			/** 消息属性 */
+			dos.writeByte(0x01);
+			/** imei */
+			byte[] imeiBcd = BytesUtils.str2Bcd(imei);
+			dos.write(imeiBcd);
+			/** 控制码 */
+			dos.writeShort(0x40A4);
+
+			ByteArrayOutputStream dataBos = new ByteArrayOutputStream();
+			DataOutputStream dataDos = new DataOutputStream(dataBos);
+			/** Mid 帧id */
+			byte[] mid = new byte[Constant.TWO];
+			mid = getBytes(toShort(new Random().nextInt(Constant.NUM_1000)));
+			dataDos.write(mid);
+			/** 开始日期 */
+			dataDos.write(BytesUtils.invertArray(BytesUtils.str2Bcd(param.getString("startDate"))));
+			/** 结束日期 */
+			dataDos.write(BytesUtils.invertArray(BytesUtils.str2Bcd(param.getString("endDate"))));
+
+
+			/** 备用字节 */
+			byte[] back = new byte[Constant.TEN];
+			dataDos.write(back);
+			/** imei */
+			dataDos.write(imeiBcd);
+			/** crc校验 */
+			dataDos.write(hexStringToBytes(getReserveCrc(dataBos.toByteArray())));
+
+			/** 使用密钥加密 */
+			byte[] encryptedData = CommFunc.encryptDataECB(imei, dataBos.toByteArray());
+
+			/** 数据长度 */
+			byte[] lenght = BytesUtils.getBytes((short) encryptedData.length);
+			dos.write(BytesUtils.invertArray(lenght));
+			/** 数据（加密） */
+			dos.write(encryptedData);
+
+			dos.write(hexStringToBytes(getReserveCrc(bos.toByteArray())));
+			dos.writeByte(0x16);
+			dataFrame = BytesUtils.bytesToHex(bos.toByteArray());
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return dataFrame;
+	}
+	
+	/** 
+	*  设置主站地址
+	* @Title: make40A5Frame 
+	* @param @param imei
+	* @param @param param
+	* @param @return    设定文件 
+	* @return String    返回类型 
+	* @throws 
+	*/
+	public static String make40A5Frame(String imei, JSONObject param) {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		DataOutputStream dos = new DataOutputStream(bos);
+		String dataFrame = null;
+		imei = String.format("%016d", toLong(imei));
+		try {
+			/** 起始字符 */
+			dos.writeByte(0x68);
+			/** 规约类型 */
+			dos.writeByte(0x20);
+			/** 消息属性 */
+			dos.writeByte(0x01);
+			/** imei */
+			byte[] imeiBcd = BytesUtils.str2Bcd(imei);
+			dos.write(imeiBcd);
+			/** 控制码 */
+			dos.writeShort(0x40A5);
+
+			ByteArrayOutputStream dataBos = new ByteArrayOutputStream();
+			DataOutputStream dataDos = new DataOutputStream(dataBos);
+			/** Mid 帧id */
+			byte[] mid = new byte[Constant.TWO];
+			mid = getBytes(toShort(new Random().nextInt(Constant.NUM_1000)));
+			dataDos.write(mid);
+			/** 主站ip地址 16进制字符串 10.47.18.228转为0A2F12E4 */
+			dataDos.write(BytesUtils.hexStringToBytes((param.getString("ip"))));
+			/** 主站端口 */
+			dataDos.write(getBytes(toShort(param.getString("port"))));
+
+			/** 备用字节 */
+			byte[] back = new byte[Constant.TEN];
+			dataDos.write(back);
+			/** imei */
+			dataDos.write(imeiBcd);
+			/** crc校验 */
+			dataDos.write(hexStringToBytes(getReserveCrc(dataBos.toByteArray())));
+
+			/** 使用密钥加密 */
+			byte[] encryptedData = CommFunc.encryptDataECB(imei, dataBos.toByteArray());
+
+			/** 数据长度 */
+			byte[] lenght = BytesUtils.getBytes((short) encryptedData.length);
+			dos.write(BytesUtils.invertArray(lenght));
+			/** 数据（加密） */
+			dos.write(encryptedData);
+
+			dos.write(hexStringToBytes(getReserveCrc(bos.toByteArray())));
+			dos.writeByte(0x16);
+			dataFrame = BytesUtils.bytesToHex(bos.toByteArray());
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return dataFrame;
+	}
+	
+	/** 
+	*  更新设备密钥
+	* @Title: make40A6Frame 
+	* @param @param imei
+	* @param @param param
+	* @param @return    设定文件 
+	* @return String    返回类型 
+	* @throws 
+	*/
+	public static String make40A6Frame(String imei, JSONObject param) {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		DataOutputStream dos = new DataOutputStream(bos);
+		String dataFrame = null;
+		imei = String.format("%016d", toLong(imei));
+		try {
+			/** 起始字符 */
+			dos.writeByte(0x68);
+			/** 规约类型 */
+			dos.writeByte(0x20);
+			/** 消息属性 */
+			dos.writeByte(0x01);
+			/** imei */
+			byte[] imeiBcd = BytesUtils.str2Bcd(imei);
+			dos.write(imeiBcd);
+			/** 控制码 */
+			dos.writeShort(0x40A6);
+
+			ByteArrayOutputStream dataBos = new ByteArrayOutputStream();
+			DataOutputStream dataDos = new DataOutputStream(dataBos);
+			/** Mid 帧id */
+			byte[] mid = new byte[Constant.TWO];
+			mid = getBytes(toShort(new Random().nextInt(Constant.NUM_1000)));
+			dataDos.write(mid);
+			
+			int keyNo = (int) (toLong(imei) % 10);
+			/** 新密钥 */
+			String secretKey = SM4.getSecretKey(keyNo, imei);
+			dataDos.write(secretKey.getBytes());
+			/** 母钥编号 */
+			dataDos.write(toByte(keyNo)); 
+
+			/** 备用字节 */
+			byte[] back = new byte[Constant.TEN];
+			dataDos.write(back);
+			/** imei */
+			dataDos.write(imeiBcd);
+			/** crc校验 */
+			dataDos.write(hexStringToBytes(getReserveCrc(dataBos.toByteArray())));
+
+			/** 使用备用密钥加密 */
+			SM4Utils sm4 = new SM4Utils();
+			sm4.secretKey = new StringBuilder(imei).reverse().toString();
+			sm4.hexString = false;
+			byte[] encryptedData = sm4.encryptDataECB(dataBos.toByteArray());
+
+			/** 数据长度 */
+			byte[] lenght = BytesUtils.getBytes((short) encryptedData.length);
+			dos.write(BytesUtils.invertArray(lenght));
+			/** 数据（加密） */
+			dos.write(encryptedData);
+
+			dos.write(hexStringToBytes(getReserveCrc(bos.toByteArray())));
+			dos.writeByte(0x16);
+			dataFrame = BytesUtils.bytesToHex(bos.toByteArray());
+
+			/** 将新密钥存入redis */
+			JedisUtils.set(imei, secretKey);
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return dataFrame;
+	}
+	
+	/** 
+	*  召母钥版本
+	* @Title: make40A7Frame 
+	* @param @param imei
+	* @param @param param
+	* @param @return    设定文件 
+	* @return String    返回类型 
+	* @throws 
+	*/
+	public static String make40A7Frame(String imei, JSONObject param) {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		DataOutputStream dos = new DataOutputStream(bos);
+		String dataFrame = null;
+		imei = String.format("%016d", toLong(imei));
+		try {
+			/** 起始字符 */
+			dos.writeByte(0x68);
+			/** 规约类型 */
+			dos.writeByte(0x20);
+			/** 消息属性 */
+			dos.writeByte(0x01);
+			/** imei */
+			byte[] imeiBcd = BytesUtils.str2Bcd(imei);
+			dos.write(imeiBcd);
+			/** 控制码 */
+			dos.writeShort(0x40A7);
+
+			ByteArrayOutputStream dataBos = new ByteArrayOutputStream();
+			DataOutputStream dataDos = new DataOutputStream(dataBos);
+			/** Mid 帧id */
+			byte[] mid = new byte[Constant.TWO];
+			mid = getBytes(toShort(new Random().nextInt(Constant.NUM_1000)));
+			dataDos.write(mid);
+
+			/** 备用字节 */
+			byte[] back = new byte[Constant.TEN];
+			dataDos.write(back);
+			/** imei */
+			dataDos.write(imeiBcd);
+			/** crc校验 */
+			dataDos.write(hexStringToBytes(getReserveCrc(dataBos.toByteArray())));
+
+
+			/** 数据长度 */
+			byte[] lenght = BytesUtils.getBytes((short) dataBos.toByteArray().length);
+			dos.write(BytesUtils.invertArray(lenght));
+			/** 数据（加密） */
+			dos.write(dataBos.toByteArray());
+
+			dos.write(hexStringToBytes(getReserveCrc(bos.toByteArray())));
+			dos.writeByte(0x16);
+			dataFrame = BytesUtils.bytesToHex(bos.toByteArray());
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return dataFrame;
+	}
+	
 	/** 
 	*  验证消息，并返回数据部分 
 	* @Title: verifyDataFrame 

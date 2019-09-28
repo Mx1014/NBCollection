@@ -512,6 +512,10 @@ public class Constant {
 	public static final byte FRAME_START= 0x68;
 	public static final byte FRAME_END= 0x16;
 	public static final byte NB_TYPE = 0x20;
+	public static final int NUM_49 = 49;
+	public static final int NUM_18 = 18;
+	public static final int NUM_130 = 130;
+	public static final int NUM_37 = 37;
 
 }
 

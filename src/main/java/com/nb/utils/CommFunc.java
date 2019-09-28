@@ -4,6 +4,7 @@
 package com.nb.utils;
 
 import static com.nb.utils.ConverterUtils.toInt;
+import static com.nb.utils.ConverterUtils.toLong;
 import static com.nb.utils.ConverterUtils.toStr;
 
 import java.io.BufferedReader;
@@ -13,13 +14,17 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.security.MessageDigest;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Base64;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.FileImageOutputStream;
 import org.springframework.core.io.ClassPathResource;
 import com.alibaba.fastjson.JSONObject;
+import com.nb.model.ke.KeMsg;
 
 /**
  * @ClassName: CommFunc
@@ -305,4 +310,70 @@ public class CommFunc {
 		return command.get(commandKey);
 	}
 	
+	/** 
+	* 解密数据域 
+	* @Title: decryptDataECB 
+	* @param @param keMsg
+	* @param @return    设定文件 
+	* @return byte[]    返回类型 
+	* @throws 
+	*/
+	public static byte[] decryptDataECB(KeMsg keMsg) {
+		String imei = String.format("%016d", toLong(keMsg.getImei()));
+		String secretKey = JedisUtils.get(imei);
+		SM4Utils sm4 = new SM4Utils();
+		sm4.secretKey = secretKey;
+		sm4.hexString = false;
+
+		try {
+			/** 解密数据域 */
+			byte[] data = sm4.decryptDataECB(keMsg.getData());
+			return data;
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		return null;
+	}
+	
+	/** 
+	* sm4加密
+	* @Title: encryptDataECB 
+	* @param @param imei
+	* @param @param data
+	* @param @return    设定文件 
+	* @return byte[]    返回类型 
+	* @throws 
+	*/
+	public static byte[] encryptDataECB(String imei, byte[] data) {
+		String secretKey = JedisUtils.get(imei);
+		SM4Utils sm4 = new SM4Utils();
+		sm4.secretKey = secretKey;
+		sm4.hexString = false;
+		try {
+			byte[] encryptedData = sm4.encryptDataECB(data);
+			return encryptedData;
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		return null;
+	}
+	
+	/** 
+	* 将ssmmHHddMM转成Date格式
+	* @Title: parseKeTime 
+	* @param @param time
+	* @param @return    设定文件 
+	* @return Date    返回类型 
+	* @throws 
+	*/
+	public static Date parseKeTime(String time) {
+		try {
+			time = time.substring(0, 10) + "20" + time.substring(10);
+			SimpleDateFormat sdf = new SimpleDateFormat("ssmmHHddMMyyyy");
+			return sdf.parse(time);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return new Date();
+	}
 }
