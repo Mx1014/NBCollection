@@ -20,37 +20,28 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
-import com.nb.httputil.HttpsClientUtil;
 import com.nb.logger.LogName;
 import com.nb.logger.LoggerUtil;
 import com.nb.mapper.CommonMapper;
 import com.nb.mapper.ke.NbWaterMeterMapper;
-import com.nb.model.DeviceInfo;
 import com.nb.model.SM4;
-import com.nb.model.StreamClosedHttpResponse;
 import com.nb.model.ke.KeMsg;
 import com.nb.model.ke.NbDailyData;
 import com.nb.model.ke.NbInstantaneous;
 import com.nb.model.ke.NbWaterMeter;
 import com.nb.utils.BytesUtils;
-import com.nb.utils.CommFunc;
 import com.nb.utils.Constant;
-import com.nb.utils.ConverterUtils;
 import com.nb.utils.DateUtils;
 
 import static com.nb.utils.ConverterUtils.*;
 import com.nb.utils.JedisUtils;
 import com.nb.utils.JsonUtil;
-import com.nb.utils.NumberUtils;
 import com.nb.utils.SM4Utils;
 
 /**
@@ -76,7 +67,6 @@ public class KeProtocolUtil {
 		keProtocolUtil.commonMapper = this.commonMapper;
 		keProtocolUtil.nbWaterMeterMapper = this.nbWaterMeterMapper;
 	}
-
 	 
 	/** 
 	*  解析上报数据帧 
@@ -139,7 +129,6 @@ public class KeProtocolUtil {
 		}
 		return dataJson;
 	}
-
 	 
 	/**
 	 * @throws ParseException  
@@ -330,7 +319,6 @@ public class KeProtocolUtil {
 		return rtnJson;
 	}
 	
-
 	/**
 	 * @throws ParseException  
 	* 组建水表上报日数据，存入redis队列
@@ -495,8 +483,6 @@ public class KeProtocolUtil {
 		return rtnJson;
 	}
 
-	
-	
 	/** 
 	* 组建40AF帧
 	* @Title: make40AFFrame 
