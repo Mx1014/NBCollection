@@ -345,6 +345,7 @@ public class CommFunc {
 	* @throws 
 	*/
 	public static byte[] encryptDataECB(String imei, byte[] data) {
+		imei = String.format("%016d", toLong(imei));
 		String secretKey = JedisUtils.get(imei);
 		SM4Utils sm4 = new SM4Utils();
 		sm4.secretKey = secretKey;

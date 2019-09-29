@@ -83,7 +83,7 @@ public class MainTest {
 	public static void main(String[] args) throws UnsupportedEncodingException, ParseException {
 
 		
-		
+		byte a = 2;
 		System.out.println(new StringBuilder("0869029032410846").reverse().toString());
 //        for (int i = 0; i < 12; i++) {
 //            System.out.println(new Random().nextInt(100));

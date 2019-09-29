@@ -41,7 +41,7 @@ import com.nb.model.ke.NbWaterMeter;
 import com.nb.utils.BytesUtils;
 import com.nb.utils.CommFunc;
 import com.nb.utils.Constant;
-import com.nb.utils.DateUtils;
+import static com.nb.utils.DateUtils.*;
 
 import static com.nb.utils.ConverterUtils.*;
 import com.nb.utils.JedisUtils;
@@ -230,12 +230,12 @@ public class KeProtocolUtil {
 			imeiCode = toStr(toLong(imeiCode));
 			NbWaterMeter nbWaterMeter = keProtocolUtil.nbWaterMeterMapper.getNbWaterMeter(imeiCode);
 
-			int ymd = toInt(DateUtils.formatDateByFormat(reportBaseDate, "yyyyMMdd"));
-			int hmsms = toInt(DateUtils.formatDateByFormat(reportBaseDate, "HHmmss")) * Constant.NUM_1000;
+			int ymd = toInt(formatDateByFormat(reportBaseDate, "yyyyMMdd"));
+			int hmsms = toInt(formatDateByFormat(reportBaseDate, "HHmmss")) * Constant.NUM_1000;
 			Eve eve = new Eve(ymd, hmsms, nbWaterMeter.getRtuId(), toInt(nbWaterMeter.getMpId()));
 			if (data1 == Constant.ONE) {
 				StringBuffer sb = new StringBuffer();
-				sb.append("发生时间：").append(DateUtils.formatTimesTampDate(CommFunc.parseKeTime(largeFlowDate)));
+				sb.append("发生时间：").append(formatTimesTampDate(CommFunc.parseKeTime(largeFlowDate)));
 				sb.append(",").append("发生值：").append(largeFlowValue).append("立方米");
 				eve.setCharInfo(sb.toString());
 				eve.setTypeno(Constant.ALARM_2001);
@@ -244,7 +244,7 @@ public class KeProtocolUtil {
 
 			if (data4 == Constant.ONE) {
 				StringBuffer sb = new StringBuffer();
-				sb.append("发生时间：").append(DateUtils.formatTimesTampDate(CommFunc.parseKeTime(smallFlowDate)));
+				sb.append("发生时间：").append(formatTimesTampDate(CommFunc.parseKeTime(smallFlowDate)));
 				sb.append(",").append("发生值：").append(smallFlowValue).append("立方米");
 				eve.setCharInfo(sb.toString());
 				eve.setTypeno(Constant.ALARM_2002);
@@ -782,12 +782,14 @@ public class KeProtocolUtil {
 	* @throws 
 	*/
 	private static JSONObject parseC0A0(KeMsg keMsg) throws ParseException {
-		JSONObject rtnJson = new JSONObject();
+	
 		/** 解密数据域 */
 		byte[] data = CommFunc.decryptDataECB(keMsg);
 		if (null == data) {
 			return null;
 		}
+		
+		JSONObject rtnJson = new JSONObject();
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		DataInputStream dis = new DataInputStream(bais);
 		try {
@@ -795,90 +797,72 @@ public class KeProtocolUtil {
 			byte[] data0 = new byte[Constant.SIX];
 			dis.read(data0);
 			String freezeDate = BytesUtils.bcdToString(data0);
-
 			/** 日冻结表底 */
 			byte[] data1 = new byte[Constant.FOUR];
 			dis.read(data1);
 			double totalFlow = toDouble(getInt(invertArray(data1))) / Constant.NUM_1000;
-
 			/** 当前正向累计流量 */
 			byte[] data2 = new byte[Constant.FOUR];
 			dis.read(data2);
 			double totalPositiveFlow = toDouble(getInt(invertArray(data2))) / Constant.NUM_1000;
-
 			/** 当前反向累计流量 */
 			byte[] data3 = new byte[Constant.FOUR];
 			dis.read(data3);
 			double totalNegativeFlow = toDouble(getInt(invertArray(data3))) / Constant.NUM_1000;
-
 			/** 冻结前一日正向累计流量 */
 			byte[] data4 = new byte[Constant.FOUR];
 			dis.read(data4);
 			double dailyPositiveFlow = toDouble(getInt(invertArray(data4))) / Constant.NUM_1000;
-
 			/** 冻结前一日反向累计流量 */
 			byte[] data5 = new byte[Constant.FOUR];
 			dis.read(data5);
 			double dailyNegativeFlow = toDouble(getInt(invertArray(data5)))/ Constant.NUM_1000;
-
 			/** 冻结前一日瞬时量 */
 			byte[] data6 = new byte[Constant.NUM_96];
 			dis.read(data6);
-
 			/** 备用字节 */
 			byte[] data7 = new byte[Constant.TEN];
 			dis.read(data7);
-
 			/** 水表时钟 SSMMHHDDMMYY */
 			byte[] data8 = new byte[Constant.SIX];
 			dis.read(data8);
-
 			/** 电池电压 */
 			byte data9 = dis.readByte();
  			double batteryVoltage = toDouble(data9) / Constant.TEN;
-
 			/** 版本号 */
 			byte[] data10 = new byte[Constant.FIVE];
 			dis.read(data10);
 			String version = hexToAscii(bytesToHex(data10));
-
 			/** 阀门状态 */
 			byte valveStatus = dis.readByte();
-
 			/** 前一日最大流速 */
 			byte[] data12 = new byte[Constant.TWO];
 			dis.read(data12);
 			double dailyMaxVelocity = toDouble(getShort(invertArray(data12))) / Constant.NUM_1000;
-
 			/** 前一日最大流速发生时间 */
 			byte[] data13 = new byte[Constant.SIX];
 			dis.read(data13);
 			String dailyMaxVelocityTime = BytesUtils.bcdToString(data13);
-
 			/** 上报基准时间 */
 			byte[] data14 = new byte[Constant.SIX];
 			dis.read(data14);
 			String reportBaseTime = BytesUtils.bcdToString(data14);
-
 			/** 上报时间间隔 0-25 单位小时 */
 			byte data15 = dis.readByte();
-
 			/** 大流量告警阀值 */
 			byte[] data16 = new byte[Constant.TWO];
 			dis.read(data16);
 			short largeFlowAlarmThreshold = getShort(invertArray(data16));
 			/** 大流量告警持续时间 */
 			byte largeFlowAlarmThresholdTime = dis.readByte();
-
 			/** 小流量告警阀值 */
 			byte[] data18 = new byte[Constant.TWO];
 			dis.read(data18);
-			double smallFlowAlarmThreshold = toDouble(getShort(invertArray(data12))) / Constant.TEN;
+			double smallFlowAlarmThreshold = toDouble(getShort(invertArray(data18))) / Constant.TEN;
 			/** 小流量告警持续时间 */
 			byte smallFlowAlarmThresholdTime = dis.readByte();
 			/** 长时间用水阀值 */
 			byte longTimeUseWaterThresholdTime = dis.readByte();
-
 			/** 电池低电压告警阀值 */
 			byte data21 = dis.readByte();
  			double lowVoltageAlarmThreshold = toDouble(data21) / Constant.TEN;
@@ -886,55 +870,36 @@ public class KeProtocolUtil {
 			byte data22 = dis.readByte();
 			/** 低压告警阀值 */
 			byte data23 = dis.readByte();
-
 			/** 备用字节 */
 			byte[] data24 = new byte[Constant.TEN];
 			dis.read(data24);
-
 			/** imei码 */
 			byte[] imeiBytes = new byte[Constant.EIGHT];
 			dis.read(imeiBytes);
 			String imeiCode = BytesUtils.bcdToString(imeiBytes);
-
 			/** 校验字节 */
 			byte[] crc = new byte[Constant.TWO];
 			dis.read(crc);
-
 			/** 获取待验证数据，并计算CRC值 */
 			byte[] crcData = new byte[Constant.NUM_188];
 			System.arraycopy(data, Constant.ZERO, crcData, Constant.ZERO, crcData.length);
 			String calcCrc = getReserveCrc(crcData);
-
 			/** 验证CRC与计算值 */
 			if (!bytesToHex(crc).equals(calcCrc)) {
 				LoggerUtil.logger(LogName.ERROR).error("设备{}crc校验失败", imeiCode);
 				return null;
 			}
-
 			if (!imeiCode.equals(keMsg.getImei())) {
 				LoggerUtil.logger(LogName.ERROR).error("设备{}imei不匹配，直接丢掉", imeiCode);
 				return null;
 			}
-
 			/** 存库操作 nb_daily_data_200808 nb_instantaneous_200808 */
 			imeiCode = toStr(toLong(imeiCode));
 			NbWaterMeter nbWaterMeter = keProtocolUtil.nbWaterMeterMapper.getNbWaterMeter(imeiCode);
-			nbWaterMeter.setFirmwareVersion(version);
-			nbWaterMeter.setLowVoltageThreshold(lowVoltageAlarmThreshold);
-			nbWaterMeter.setLowPressureThreshold(toDouble(data23));
-			nbWaterMeter.setHighPressureThreshold(toDouble(data22));
-			nbWaterMeter.setLargeFlowThreshold(toDouble(largeFlowAlarmThreshold));
-			nbWaterMeter.setLargeFlowDuration(toInt(largeFlowAlarmThresholdTime));
-			nbWaterMeter.setLongTimeWaterUseThreshold(toInt(longTimeUseWaterThresholdTime));
-			nbWaterMeter.setSmallFlowThreshold(smallFlowAlarmThreshold);
-			nbWaterMeter.setSmallFlowDuration(toInt(smallFlowAlarmThresholdTime));
-
-			Date reportBaseDate = CommFunc.parseKeTime(reportBaseTime);
-			nbWaterMeter.setReportBaseTime(DateUtils.formatTimesTampDate(reportBaseDate));
-			nbWaterMeter.setReportIntervalTime(toInt(data15));
-			nbWaterMeter.setValveStatus(valveStatus);
-			nbWaterMeter.setFirmwareVersion(version);
-			keProtocolUtil.nbWaterMeterMapper.updateNbWaterMeter(nbWaterMeter);
+			
+			updateNbWaterMeter(nbWaterMeter, version, lowVoltageAlarmThreshold, data23, data22, largeFlowAlarmThreshold,
+					largeFlowAlarmThresholdTime, longTimeUseWaterThresholdTime, smallFlowAlarmThreshold,
+					smallFlowAlarmThresholdTime, reportBaseTime, data15, valveStatus);
 			
 			saveDailyData(nbWaterMeter, freezeDate, totalFlow, totalPositiveFlow, totalNegativeFlow, dailyPositiveFlow,
 					dailyNegativeFlow, dailyMaxVelocity, dailyMaxVelocityTime, batteryVoltage, valveStatus);
@@ -948,6 +913,46 @@ public class KeProtocolUtil {
 		}
 
 		return rtnJson;
+	}
+	
+	/** 
+	* 更新水表参数
+	* @Title: updateNbWaterMeter 
+	* @param @param nbWaterMeter
+	* @param @param version
+	* @param @param lowVoltageAlarmThreshold
+	* @param @param data23
+	* @param @param data22
+	* @param @param largeFlowAlarmThreshold
+	* @param @param largeFlowAlarmThresholdTime
+	* @param @param longTimeUseWaterThresholdTime
+	* @param @param smallFlowAlarmThreshold
+	* @param @param smallFlowAlarmThresholdTime
+	* @param @param reportBaseTime
+	* @param @param data15
+	* @param @param valveStatus    设定文件 
+	* @return void    返回类型 
+	* @throws 
+	*/
+	private static void updateNbWaterMeter(NbWaterMeter nbWaterMeter, String version, double lowVoltageAlarmThreshold,
+			byte data23, byte data22, short largeFlowAlarmThreshold, byte largeFlowAlarmThresholdTime,
+			byte longTimeUseWaterThresholdTime, double smallFlowAlarmThreshold, byte smallFlowAlarmThresholdTime,
+			String reportBaseTime, byte data15, byte valveStatus) {
+		nbWaterMeter.setFirmwareVersion(version);
+		nbWaterMeter.setLowVoltageThreshold(lowVoltageAlarmThreshold);
+		nbWaterMeter.setLowPressureThreshold(toDouble(data23));
+		nbWaterMeter.setHighPressureThreshold(toDouble(data22));
+		nbWaterMeter.setLargeFlowThreshold(toDouble(largeFlowAlarmThreshold));
+		nbWaterMeter.setLargeFlowDuration(toInt(largeFlowAlarmThresholdTime));
+		nbWaterMeter.setLongTimeWaterUseThreshold(toInt(longTimeUseWaterThresholdTime));
+		nbWaterMeter.setSmallFlowThreshold(smallFlowAlarmThreshold);
+		nbWaterMeter.setSmallFlowDuration(toInt(smallFlowAlarmThresholdTime));
+
+		Date reportBaseDate = CommFunc.parseKeTime(reportBaseTime);
+		nbWaterMeter.setReportBaseTime(formatTimesTampDate(reportBaseDate));
+		nbWaterMeter.setReportIntervalTime(toInt(data15));
+		nbWaterMeter.setValveStatus(valveStatus);
+		keProtocolUtil.nbWaterMeterMapper.updateNbWaterMeter(nbWaterMeter);
 	}
 	
 	/**
@@ -977,13 +982,13 @@ public class KeProtocolUtil {
 				totalPositiveFlow, totalNegativeFlow, dailyPositiveFlow, dailyNegativeFlow, dailyMaxVelocity,
 				batteryVoltage, valveStatus);
 		Date reprotDate = CommFunc.parseKeTime(freezeDate);
-		int ymd = toInt(DateUtils.formatDateByFormat(reprotDate, "yyyyMMdd"));
+		int ymd = toInt(formatDateByFormat(reprotDate, "yyyyMMdd"));
 		nbdailyData.setYmd(ymd);
-		nbdailyData.setHms(toInt(DateUtils.formatDateByFormat(reprotDate, "HHmmss")));
+		nbdailyData.setHms(toInt(formatDateByFormat(reprotDate, "HHmmss")));
 		nbdailyData.setTableName(toStr(ymd / Constant.NUM_100));		
 		
 		Date maxVelocityTime = CommFunc.parseKeTime(dailyMaxVelocityTime);
-		nbdailyData.setDailyMaxVelocityTime(DateUtils.formatTimesTampDate(maxVelocityTime));
+		nbdailyData.setDailyMaxVelocityTime(formatTimesTampDate(maxVelocityTime));
 
 		JedisUtils.lpush(Constant.HISTORY_DAILY_QUEUE, JsonUtil.jsonObj2Sting(nbdailyData));
 	}
@@ -1002,19 +1007,17 @@ public class KeProtocolUtil {
 	private static void saveInstantaneousData(NbWaterMeter nbWaterMeter, String freezeDate, byte[] data)
 			throws ParseException, IOException {
 		Date reprotDate = CommFunc.parseKeTime(freezeDate);
-		int ymd = toInt(DateUtils.formatDateByFormat(reprotDate, "yyyyMMdd"));
-
 		Calendar cal = Calendar.getInstance();
-		cal.setTime(DateUtils.parseTimesTampDate(toStr(ymd), DateUtils.DATE_PATTERN));
+		cal.setTime(parseTimesTampDate(formatDateByFormat(reprotDate, "yyyyMMdd"), DATE_PATTERN));
 		cal.add(Calendar.DAY_OF_YEAR, -1);
 
-		ymd = toInt(DateUtils.parseDate(cal.getTime(), DateUtils.DATE_PATTERN));
+		int ymd = toInt(parseDate(cal.getTime(), DATE_PATTERN));
 		NbInstantaneous nbInstantaneous = new NbInstantaneous(nbWaterMeter.getRtuId(), nbWaterMeter.getMpId(), ymd,
 				toStr(ymd / Constant.NUM_100));
 
 		List<Double> flowList = getInstantaneousData(data);
 		for (int i = 0; i < flowList.size(); i++) {
-			int time = toInt(DateUtils.formatDateByFormat(cal.getTime(), DateUtils.TIME_PATTERN));
+			int time = toInt(formatDateByFormat(cal.getTime(), TIME_PATTERN));
 			nbInstantaneous.setHms(time);
 			nbInstantaneous.setTotalFlow(flowList.get(i));
 
@@ -1068,25 +1071,28 @@ public class KeProtocolUtil {
 		}
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		DataInputStream dis = new DataInputStream(bais);
-
+		int dataLength = 0;
 		try {
 			/** imei码 */
 			byte[] imeiBytes = new byte[Constant.EIGHT];
 			dis.read(imeiBytes);
+			dataLength += imeiBytes.length;
 			String imei = BytesUtils.bcdToString(imeiBytes);
 			/** 默认密钥 */
 			byte[] keyBytes = new byte[Constant.NUM_16];
 			dis.read(keyBytes);
+			dataLength += keyBytes.length;
 			String key = new String(keyBytes);
 			/** 备用字节 */
 			byte[] back = new byte[Constant.TEN];
 			dis.read(back);
+			dataLength += back.length;
 			/** 校验字节 */
 			byte[] crc = new byte[Constant.TWO];
 			dis.read(crc);
 
 			/** 获取待验证数据，并计算CRC值 */
-			byte[] crcData = new byte[Constant.NUM_34];
+			byte[] crcData = new byte[dataLength];
 			System.arraycopy(data, Constant.ZERO, crcData, Constant.ZERO, crcData.length);
 			String calcCrc = getReserveCrc(crcData);
 
@@ -1406,7 +1412,7 @@ public class KeProtocolUtil {
 			dataDos.write(param.getByte("longTimeUsedAlramTime"));
 			/** 上报基准时间 */
 			SimpleDateFormat sdf = new SimpleDateFormat("ssmmHHddMMyy");
-			Date reportBaseTime = DateUtils.parseTimesTampDate(param.getString("reportBaseTime"));
+			Date reportBaseTime = parseTimesTampDate(param.getString("reportBaseTime"));
 			dataDos.write(BytesUtils.str2Bcd(sdf.format(reportBaseTime)));
 			/** 上报时间间隔 */
 			dataDos.write(param.getByte("reportingInterval"));
