@@ -303,6 +303,7 @@ public class CommFunc {
 	}
 	
 	
+	@SuppressWarnings("unchecked")
 	public static Map<String, String> getCommandType(int nbType, int commandType) {
 		Map<String, Map<String, String>> command = new HashMap<>();
 		command = JsonUtil.jsonString2SimpleObj(JedisUtils.get(Constant.COMMAND_TYPE_REIDS), command.getClass());
