@@ -8,11 +8,20 @@
 */
 package com.nb.service.chinamobileimpl;
 
-import com.alibaba.fastjson.JSON;
+import javax.annotation.Resource;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.alibaba.fastjson.JSONObject;
+import com.nb.mapper.ke.NbWaterMeterMapper;
+import com.nb.model.ke.NbWaterMeter;
 import com.nb.protocolutil.KeProtocolUtil;
+import com.nb.service.IChinaMobileCommandService;
 import com.nb.service.IChinaMobileService;
 import com.nb.utils.BytesUtils;
+import com.nb.utils.Constant;
+import com.nb.utils.ConverterUtils;
 
 /** 
 * @ClassName: ChinaMobileKeServiceImpl 
@@ -21,8 +30,14 @@ import com.nb.utils.BytesUtils;
 * @date 2019年9月2日 上午10:41:06 
 *  
 */
+@Service
 public class ChinaMobileKeServiceImpl implements IChinaMobileService {
 
+	@Autowired
+	private IChinaMobileCommandService chinaMobileCommandService;
+	
+	@Resource
+	private NbWaterMeterMapper nbWaterMeterMapper;
 	/** (非 Javadoc) 
 	* <p>Title: parseDataPointMsg</p> 
 	* <p>Description: </p> 
@@ -32,13 +47,39 @@ public class ChinaMobileKeServiceImpl implements IChinaMobileService {
 	*/
 	@Override
 	public void parseDataPointMsg(JSONObject msgJson) throws Exception {
-		// TODO Auto-generated method stub
 		byte[] dataFrame = BytesUtils.hexStringToBytes(msgJson.getString("value"));
+		JSONObject resultJson = KeProtocolUtil.parseDataFrame(dataFrame);
+		if (resultJson == null) {
+			return;
+		}
 		
-		KeProtocolUtil.parseDataFrame(dataFrame);
-// 		chinaMobileCommandService.instantCommand(JSONObject.parseObject(JSON.toJSONString(meterInfo)));
-
-
+		String control = resultJson.getString("control");
+		String imei = ConverterUtils.toStr(ConverterUtils.toLong(resultJson.getString("imei")));
+		String cmdFrame = null;
+		switch (control) {
+		case Constant.C0AF:
+			cmdFrame = KeProtocolUtil.make40AFFrame(imei);
+			break;
+		case Constant.C0A0:
+			cmdFrame = KeProtocolUtil.make40A0Frame(imei);
+			break;
+		case Constant.C0A1:
+			cmdFrame = KeProtocolUtil.make40A1Frame(imei);
+			break;
+		default:
+			break;
+		}
+ 		NbWaterMeter nbWaterMeter = nbWaterMeterMapper.getNbWaterMeter(imei);
+		if (cmdFrame ==null || nbWaterMeter == null) {
+			return;
+		}
+		JSONObject param = new JSONObject();
+		param.put("rtuId", nbWaterMeter.getRtuId());
+		param.put("mpId", nbWaterMeter.getMpId());
+		param.put("commandId", Constant.ONE);
+		param.put("commandData", cmdFrame);
+		
+  		chinaMobileCommandService.instantCommand(param);
 	}
 
 	/** (非 Javadoc) 

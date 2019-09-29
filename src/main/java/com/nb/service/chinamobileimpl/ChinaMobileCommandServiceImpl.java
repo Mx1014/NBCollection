@@ -30,6 +30,7 @@ import com.nb.model.DeviceInfo;
 import com.nb.model.ke.NbCommand;
 import com.nb.model.StreamClosedHttpResponse;
 import com.nb.protocolutil.FxProtocolUtil;
+import com.nb.protocolutil.KeProtocolUtil;
 import com.nb.protocolutil.SuntrontProtocolUtil;
 import com.nb.service.IChinaMobileCommandService;
 import com.nb.utils.CommFunc;
@@ -209,21 +210,13 @@ public class ChinaMobileCommandServiceImpl implements IChinaMobileCommandService
 		
 		JSONObject argsJson = new JSONObject();
 		/** 将传过来的命令参数，根据规约转成16进制字符串 */
-		JSONObject cmdJson = getCommandData(deviceInfo, command);
-		argsJson.put("args", cmdJson.getString("commandData"));
+		String cmdFrame = getCommandData(deviceInfo, command);
+		argsJson.put("args", cmdFrame);
 
 		StreamClosedHttpResponse response = httpsClientUtil.doPostJsonGetStatusLine(url,
 				CommFunc.getChinaMobileHeader(deviceInfo.getAppId()), argsJson.toJSONString());
-		String commandId = "";
-		if (cmdJson.containsKey("commandId")) {
-			commandId = cmdJson.getString("commandId");
-		}
-
-		command.put("commandId", commandId);
 		return commandResult(response, command);
 	}
-	
-	
 	
 	/** 
 	* @Title: insertNbCommand 
@@ -269,52 +262,39 @@ public class ChinaMobileCommandServiceImpl implements IChinaMobileCommandService
 	* @return String    返回类型 
 	* @throws 
 	*/
-	private JSONObject getCommandData(DeviceInfo deviceInfo, JSONObject command) throws Exception {
-		JSONObject cmdJson = new JSONObject();
-		String commandData = "", commandId = "";
-		JSONObject param = command.getJSONObject("param");
-		String meterAddr = command.getString("meterAddr");
+	private String getCommandData(DeviceInfo deviceInfo, JSONObject command) throws Exception {
+ 		String manufacturerId = deviceInfo.getManufacturerId();
 		String control = command.getString("control");
-		String manufacturerId = deviceInfo.getManufacturerId();
-		/** 新天科技移动规约 */
-		if (manufacturerId.equals(Constant.SUNTRONT_DSID)) {
+		String cmdFrame = null;
+		String imei = deviceInfo.getImei();
+		JSONObject param = command.getJSONObject("cmd");
+		/** 科林规约 */
+		if (manufacturerId.equals(Constant.KE_DSID)) {
 			switch (control) {
-			case Constant.VALVE_CMD:
-				commandData = SuntrontProtocolUtil.sendVavleCommand(param.getIntValue("operate"), meterAddr);
-				commandId = commandData.substring(commandData.length()-Constant.EIGHT, commandData.length());
-				cmdJson.put("commandId", commandId);
+			case "40A2":
+				byte cmd = command.getByteValue("cmd");
+				cmdFrame = KeProtocolUtil.make40A2Frame(imei, cmd);
 				break;
-			case Constant.D0BD_CON:
-				commandData = SuntrontProtocolUtil.get50BD(meterAddr);
+			case "40A3":
+				cmdFrame = KeProtocolUtil.make40A3Frame(imei, param);
 				break;
-
-			default:
+			case "40A4":
+				cmdFrame = KeProtocolUtil.make40A4Frame(imei,param);
 				break;
-			}
-
-		} else if (manufacturerId.equals(Constant.FX_DSID)) {
-			switch (control) {
-			case Constant.SettingValveState:
-				commandData = FxProtocolUtil.setValveState(deviceInfo, param);
-			case Constant.SettingReportPeriod:
-				commandData = FxProtocolUtil.setReportPeriod(deviceInfo, param);
+			case "40A5":
+				cmdFrame = KeProtocolUtil.make40A5Frame(imei,param);
 				break;
-			case Constant.SettingDateTime:
-				commandData = FxProtocolUtil.setDateTime(deviceInfo, param);
+			case "40A6":
+				cmdFrame = KeProtocolUtil.make40A6Frame(imei,param);
 				break;
-			case Constant.SettingFlowAlarmThreshold:
-				commandData = FxProtocolUtil.setFlowAlarmThreshold(deviceInfo, param);
-				break;
-			case Constant.SettingPressureAlarmThreshold:
-				commandData = FxProtocolUtil.setPressureAlarmThreshold(deviceInfo, param);
+			case "40A7":
+				cmdFrame = KeProtocolUtil.make40A7Frame(imei,param);
 				break;
 			default:
 				break;
 			}
 		}
-		cmdJson.put("commandData", commandData);
-		
-		return cmdJson;
+		return cmdFrame == null ? "" : cmdFrame;
 	}
 
 	/** (非 Javadoc) 
@@ -349,6 +329,7 @@ public class ChinaMobileCommandServiceImpl implements IChinaMobileCommandService
 	* @throws Exception 
 	* @see com.nb.service.IChinaMobileCommandService#instantCommand(com.alibaba.fastjson.JSONObject) 
 	*/
+	@SuppressWarnings("unchecked")
 	@Override
 	public ResultBean<?> instantCommand(JSONObject commandInfo) throws Exception {
 		Map<String, String> param = new HashMap<>();
@@ -380,8 +361,7 @@ public class ChinaMobileCommandServiceImpl implements IChinaMobileCommandService
 		
 		JSONObject argsJson = new JSONObject();
 		/** 将传过来的命令参数，根据规约转成16进制字符串 */
-		JSONObject cmdJson = getCommandData(deviceInfo, commandInfo);
-		argsJson.put("args", cmdJson.getString("commandData"));
+ 		argsJson.put("args", commandInfo.getString("commandData"));
 
 		StreamClosedHttpResponse response = httpsClientUtil.doPostJsonGetStatusLine(url,
 				CommFunc.getChinaMobileHeader(deviceInfo.getAppId()), argsJson.toJSONString());
@@ -433,25 +413,21 @@ public class ChinaMobileCommandServiceImpl implements IChinaMobileCommandService
 			url = HttpsClientUtil.setCompleteUrl(url, urlParams);
 			
 			/** 将传过来的命令参数，根据规约转成16进制字符串 */
-			JSONObject cmdJson = getCommandData(deviceInfo, json);
+			String cmdFrame = getCommandData(deviceInfo, json);
 			
 			JSONObject argsJson = new JSONObject();
-			argsJson.put("args", cmdJson.getString("commandData"));
+			argsJson.put("args", cmdFrame);
 
 			StreamClosedHttpResponse response = httpsClientUtil.doPostJsonGetStatusLine(url,
 					CommFunc.getChinaMobileHeader(deviceInfo.getAppId()), argsJson.toJSONString());
 			String commandId = "";
-			if (cmdJson.containsKey("commandId")) {
-				commandId = cmdJson.getString("commandId");
-			} else {
-				JSONObject resJson = JSONObject.parseObject(response.getContent());
-				if (!resJson.containsKey("data")) {
-					resultList.add(new CmdResult(param.get("mpId"), Constant.ERROR, response.getContent()));
-					continue;
-				}
-				JSONObject dataJson = resJson.getJSONObject("data");
-				commandId = dataJson.getString("uuid");
+			JSONObject resJson = JSONObject.parseObject(response.getContent());
+			if (!resJson.containsKey("data")) {
+				resultList.add(new CmdResult(param.get("mpId"), Constant.ERROR, response.getContent()));
+				continue;
 			}
+			JSONObject dataJson = resJson.getJSONObject("data");
+			commandId = dataJson.getString("uuid");
 			
 			if (null == commandId || commandId.isEmpty()) {
 				resultList.add(new CmdResult(param.get("mpId"), Constant.ERROR, response.getContent()));

@@ -14,7 +14,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.security.MessageDigest;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Date;
@@ -28,7 +27,7 @@ import com.nb.model.ke.KeMsg;
 
 /**
  * @ClassName: CommFunc
- * @Description:TODO(这里用一句话描述这个类的作用)
+ * @Description:公共方法类
  * @author: dbr
  * @date: 2018年9月5日 上午11:23:18
  * 

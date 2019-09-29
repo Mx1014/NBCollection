@@ -288,6 +288,8 @@ public class KeProtocolUtil {
 			}
 
 			rtnJson.put("control", "C0A1");
+			rtnJson.put("imie", keMsg.getImei());
+
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
@@ -352,6 +354,7 @@ public class KeProtocolUtil {
 			}
 			
 			rtnJson.put("control", "C0A2");
+			rtnJson.put("imie", keMsg.getImei());
 			rtnJson.put("result", data1);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -417,6 +420,7 @@ public class KeProtocolUtil {
 			}
 			
 			rtnJson.put("control", "C0A3");
+			rtnJson.put("imie", keMsg.getImei());
 			rtnJson.put("result", data1);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -487,6 +491,7 @@ public class KeProtocolUtil {
 			}
 			saveRecallData(imeiCode, data4, data5);
 			rtnJson.put("control", "C0A4");
+			rtnJson.put("imie", keMsg.getImei());
 			rtnJson.put("result", data1);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -696,6 +701,7 @@ public class KeProtocolUtil {
 			}
 			
 			rtnJson.put("control", "C0A6");
+			rtnJson.put("imie", keMsg.getImei());
 			rtnJson.put("result", data1);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -761,6 +767,7 @@ public class KeProtocolUtil {
 			}
 			
 			rtnJson.put("control", "C0A6");
+			rtnJson.put("imie", keMsg.getImei());
 			rtnJson.put("result", data1);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -907,6 +914,8 @@ public class KeProtocolUtil {
 			saveInstantaneousData(nbWaterMeter, freezeDate, data6);
 			
 			rtnJson.put("control", "C0A0");
+			rtnJson.put("imie", keMsg.getImei());
+
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
@@ -1059,6 +1068,7 @@ public class KeProtocolUtil {
 	*/
 	private static JSONObject parseC0AF(KeMsg keMsg) {
 		JSONObject rtnJson = new JSONObject();
+		/** 默认密钥 */
 		String defaultKey = String.format("%016d", toLong(keMsg.getImei()));
 		SM4Utils sm4 = new SM4Utils();
 		sm4.secretKey = defaultKey;
@@ -1107,11 +1117,12 @@ public class KeProtocolUtil {
 				return null;
 			}
 
-			rtnJson.put("control", "C0AF");
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
 		}
+		rtnJson.put("control", "C0AF");
+		rtnJson.put("imie", keMsg.getImei());
 		return rtnJson;
 	}
 

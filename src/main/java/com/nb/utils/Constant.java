@@ -487,8 +487,6 @@ public class Constant {
 	public static final String C0A6 = "C0A6";
 	public static final String C0A7 = "C0A7";
 
-
-
 	/** 府星移动平台命令控制码 */
 	/** 设置表端压力告警参数 */
 	public static final String SettingPressureAlarmThreshold = "22";

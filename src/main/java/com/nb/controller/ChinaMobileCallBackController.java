@@ -20,6 +20,7 @@ import com.nb.logger.LogName;
 import com.nb.logger.LoggerUtil;
 import com.nb.mapper.ke.NbCommandMapper;
 import com.nb.model.ke.NbCommand;
+import com.nb.service.chinamobileimpl.ChinaMobileKeServiceImpl;
 import com.nb.utils.ChinaMobileUtil;
 import com.nb.utils.CommandEnum;
 import com.nb.utils.Constant;
@@ -37,6 +38,9 @@ public class ChinaMobileCallBackController {
 
 	@Resource
 	private NbCommandMapper nbCommandMapper;
+	
+	@Autowired
+	private ChinaMobileKeServiceImpl chinaMobileKeServiceImpl;
 	
 	/** 
 	* @Title: URLVerification 
@@ -106,9 +110,9 @@ public class ChinaMobileCallBackController {
 		if (type == Constant.CHINA_MOBILE_DATA_MSG) {
 			String dsId = msgJson.getString("ds_id");
 			switch (dsId) {
-//			case Constant.SUNTRONT_DSID:
-//				chinaMobileSuntrontService.parseDataPointMsg(msgJson);
-//				break;
+			case Constant.KE_DSID:
+				chinaMobileKeServiceImpl.parseDataPointMsg(msgJson);
+				break;
 //			case Constant.FX_DSID:
 //				chinaMobileFxService.parseDataPointMsg(msgJson);
 //				break;
