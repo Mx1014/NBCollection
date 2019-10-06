@@ -42,6 +42,11 @@
     where imei_code = #{imei,jdbcType=VARCHAR}
    </select>
    
+    <select id="isExistImei"  parameterType="string" >
+    select count('X')  from nb_water_meter
+    where imei_code = #{imei,jdbcType=VARCHAR} and device_id is not null
+   </select>
+   
   <update id="updateNbWaterMeter" parameterType="com.nb.model.ke.NbWaterMeter" >
     update nb_water_meter
     <set >

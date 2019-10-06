@@ -113,10 +113,6 @@ public class ChinaMobileCallBackController {
 			case Constant.KE_DSID:
 				chinaMobileKeServiceImpl.parseDataPointMsg(msgJson);
 				break;
-//			case Constant.FX_DSID:
-//				chinaMobileFxService.parseDataPointMsg(msgJson);
-//				break;
-
 			default:
 				break;
 			}

@@ -94,11 +94,13 @@ public class KeProtocolUtil {
 			LoggerUtil.logger(LogName.INFO).info("设备[" + keMsg.getImei() + "]未更新密钥开始上报，直接丢弃");
 			return null;
 		}
-
-		byte[] data = keMsg.getData();
-		if (data == null || data.length == Constant.ZERO) {
+		
+		String imei = toStr(toLong(keMsg.getImei()));
+		/** 判断设备是否合法 */
+		if (!keProtocolUtil.nbWaterMeterMapper.isExistImei(imei)) {
 			return null;
 		}
+		
 		JSONObject dataJson = new JSONObject();
 		switch (control) {
 		case Constant.C0AF:
@@ -287,8 +289,8 @@ public class KeProtocolUtil {
 				JedisUtils.lpush(Constant.ALARM_EVENT_QUEUE, JsonUtil.jsonObj2Sting(eve));
 			}
 
-			rtnJson.put("control", "C0A1");
-			rtnJson.put("imie", keMsg.getImei());
+			rtnJson.put(Constant.CONTROL, "C0A1");
+			rtnJson.put(Constant.IMEI, keMsg.getImei());
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -353,9 +355,9 @@ public class KeProtocolUtil {
 				return null;
 			}
 			
-			rtnJson.put("control", "C0A2");
-			rtnJson.put("imie", keMsg.getImei());
-			rtnJson.put("result", data1);
+			rtnJson.put(Constant.CONTROL, "C0A2");
+			rtnJson.put(Constant.IMEI, keMsg.getImei());
+			rtnJson.put(Constant.RESULT, data1);
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
@@ -419,9 +421,9 @@ public class KeProtocolUtil {
 				return null;
 			}
 			
-			rtnJson.put("control", "C0A3");
-			rtnJson.put("imie", keMsg.getImei());
-			rtnJson.put("result", data1);
+			rtnJson.put(Constant.CONTROL, "C0A3");
+			rtnJson.put(Constant.IMEI, keMsg.getImei());
+			rtnJson.put(Constant.RESULT, data1);
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
@@ -490,9 +492,9 @@ public class KeProtocolUtil {
 				return null;
 			}
 			saveRecallData(imeiCode, data4, data5);
-			rtnJson.put("control", "C0A4");
-			rtnJson.put("imie", keMsg.getImei());
-			rtnJson.put("result", data1);
+			rtnJson.put(Constant.CONTROL, "C0A4");
+			rtnJson.put(Constant.IMEI, keMsg.getImei());
+			rtnJson.put(Constant.RESULT, data1);
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
@@ -629,8 +631,8 @@ public class KeProtocolUtil {
 				return null;
 			}
 			
-			rtnJson.put("control", "C0A5");
-			rtnJson.put("result", data1);
+			rtnJson.put(Constant.CONTROL, "C0A5");
+			rtnJson.put(Constant.RESULT, data1);
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
@@ -700,9 +702,9 @@ public class KeProtocolUtil {
 				return null;
 			}
 			
-			rtnJson.put("control", "C0A6");
-			rtnJson.put("imie", keMsg.getImei());
-			rtnJson.put("result", data1);
+			rtnJson.put(Constant.CONTROL, "C0A6");
+			rtnJson.put(Constant.IMEI, keMsg.getImei());
+			rtnJson.put(Constant.RESULT, data1);
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
@@ -766,9 +768,9 @@ public class KeProtocolUtil {
 				return null;
 			}
 			
-			rtnJson.put("control", "C0A6");
-			rtnJson.put("imie", keMsg.getImei());
-			rtnJson.put("result", data1);
+			rtnJson.put(Constant.CONTROL, "C0A6");
+			rtnJson.put(Constant.IMEI, keMsg.getImei());
+			rtnJson.put(Constant.RESULT, data1);
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
@@ -793,6 +795,7 @@ public class KeProtocolUtil {
 		/** 解密数据域 */
 		byte[] data = CommFunc.decryptDataECB(keMsg);
 		if (null == data) {
+			LoggerUtil.logger(LogName.ERROR).error(keMsg.getImei() + "，设备解密失败");
 			return null;
 		}
 		
@@ -811,11 +814,11 @@ public class KeProtocolUtil {
 			/** 当前正向累计流量 */
 			byte[] data2 = new byte[Constant.FOUR];
 			dis.read(data2);
-			double totalPositiveFlow = toDouble(getInt(invertArray(data2))) / Constant.NUM_1000;
+			double positivetotalFlow = toDouble(getInt(invertArray(data2))) / Constant.NUM_1000;
 			/** 当前反向累计流量 */
 			byte[] data3 = new byte[Constant.FOUR];
 			dis.read(data3);
-			double totalNegativeFlow = toDouble(getInt(invertArray(data3))) / Constant.NUM_1000;
+			double negativeTotalFlow = toDouble(getInt(invertArray(data3))) / Constant.NUM_1000;
 			/** 冻结前一日正向累计流量 */
 			byte[] data4 = new byte[Constant.FOUR];
 			dis.read(data4);
@@ -908,13 +911,13 @@ public class KeProtocolUtil {
 					largeFlowAlarmThresholdTime, longTimeUseWaterThresholdTime, smallFlowAlarmThreshold,
 					smallFlowAlarmThresholdTime, reportBaseTime, data15, valveStatus);
 			
-			saveDailyData(nbWaterMeter, freezeDate, totalFlow, totalPositiveFlow, totalNegativeFlow, dailyPositiveFlow,
+			saveDailyData(nbWaterMeter, freezeDate, totalFlow, positivetotalFlow, negativeTotalFlow, dailyPositiveFlow,
 					dailyNegativeFlow, dailyMaxVelocity, dailyMaxVelocityTime, batteryVoltage, valveStatus);
 			
 			saveInstantaneousData(nbWaterMeter, freezeDate, data6);
 			
-			rtnJson.put("control", "C0A0");
-			rtnJson.put("imie", keMsg.getImei());
+			rtnJson.put(Constant.CONTROL, "C0A0");
+			rtnJson.put(Constant.IMEI, keMsg.getImei());
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -1067,7 +1070,6 @@ public class KeProtocolUtil {
 	* @throws 
 	*/
 	private static JSONObject parseC0AF(KeMsg keMsg) {
-		JSONObject rtnJson = new JSONObject();
 		/** 默认密钥 */
 		String defaultKey = String.format("%016d", toLong(keMsg.getImei()));
 		SM4Utils sm4 = new SM4Utils();
@@ -1075,10 +1077,12 @@ public class KeProtocolUtil {
 		sm4.hexString = false;
 		/** 解密数据域 */
 		byte[] data = sm4.decryptDataECB(keMsg.getData());
-		/** 解密失败 如何处理 告警手动处理 ？ 自动处理？ */
+		/** 解密失败 */
 		if (null == data) {
+			LoggerUtil.logger(LogName.ERROR).error(keMsg.getImei() + "，设备解密失败");
 			return null;
 		}
+		
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		DataInputStream dis = new DataInputStream(bais);
 		int dataLength = 0;
@@ -1116,13 +1120,13 @@ public class KeProtocolUtil {
 				LoggerUtil.logger(LogName.ERROR).error("设备{}imei或者默认密钥不匹配，直接丢掉", imei);
 				return null;
 			}
-
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
 		}
-		rtnJson.put("control", "C0AF");
-		rtnJson.put("imie", keMsg.getImei());
+		JSONObject rtnJson = new JSONObject();
+		rtnJson.put(Constant.CONTROL, Constant.C0AF);
+		rtnJson.put(Constant.IMEI, keMsg.getImei());
 		return rtnJson;
 	}
 
@@ -1496,10 +1500,9 @@ public class KeProtocolUtil {
 			mid = getBytes(toShort(new Random().nextInt(Constant.NUM_1000)));
 			dataDos.write(mid);
 			/** 开始日期 */
-			dataDos.write(BytesUtils.invertArray(BytesUtils.str2Bcd(param.getString("startDate"))));
+			dataDos.write(BytesUtils.invertArray(BytesUtils.str2Bcd(param.getString("startDate").substring(2))));
 			/** 结束日期 */
-			dataDos.write(BytesUtils.invertArray(BytesUtils.str2Bcd(param.getString("endDate"))));
-
+			dataDos.write(BytesUtils.invertArray(BytesUtils.str2Bcd(param.getString("endDate").substring(2))));
 
 			/** 备用字节 */
 			byte[] back = new byte[Constant.TEN];
@@ -1735,7 +1738,6 @@ public class KeProtocolUtil {
 	* @throws 
 	*/
 	private static KeMsg verifyDataFrame(byte[] msg) {
-
 		ByteArrayInputStream bais = new ByteArrayInputStream(msg);
 		DataInputStream dis = new DataInputStream(bais);
 		KeMsg keMsg = null;
@@ -1743,14 +1745,12 @@ public class KeProtocolUtil {
 			/** 起始字符 */
 			byte frameStart = dis.readByte();
 			if (frameStart != Constant.FRAME_START) {
-				System.out.println("起始字符错误");
 				return null;
 			}
 
 			/** 规约类型 */
 			byte protocolType = dis.readByte();
 			if (protocolType != Constant.NB_TYPE) {
-				System.out.println("规约类型错误");
 				return null;
 			}
 
@@ -1775,7 +1775,7 @@ public class KeProtocolUtil {
 
 			byte[] datas = new byte[dataLength];
 			dis.read(datas);
-
+			
 			/** 校验字节 */
 			byte[] crc = new byte[Constant.TWO];
 			dis.read(crc);
@@ -1794,14 +1794,12 @@ public class KeProtocolUtil {
 			/** 结束字符 */
 			byte end = dis.readByte();
 			if (end != Constant.FRAME_END) {
-				System.out.println("结束字符错误");
 				return null;
 			}
 
 			keMsg = new KeMsg(msgType, imei, ctrlCode, datas);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
-			return null;
 		}
 		return keMsg;
 	}

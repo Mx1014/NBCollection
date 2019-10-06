@@ -48,13 +48,14 @@ public class ChinaMobileKeServiceImpl implements IChinaMobileService {
 	@Override
 	public void parseDataPointMsg(JSONObject msgJson) throws Exception {
 		byte[] dataFrame = BytesUtils.hexStringToBytes(msgJson.getString("value"));
+		/** 解析上报数据帧 */
 		JSONObject resultJson = KeProtocolUtil.parseDataFrame(dataFrame);
 		if (resultJson == null) {
 			return;
 		}
 		
-		String control = resultJson.getString("control");
-		String imei = ConverterUtils.toStr(ConverterUtils.toLong(resultJson.getString("imei")));
+		String control = resultJson.getString(Constant.CONTROL);
+		String imei = ConverterUtils.toStr(ConverterUtils.toLong(resultJson.getString(Constant.IMEI)));
 		String cmdFrame = null;
 		switch (control) {
 		case Constant.C0AF:
@@ -69,8 +70,11 @@ public class ChinaMobileKeServiceImpl implements IChinaMobileService {
 		default:
 			break;
 		}
- 		NbWaterMeter nbWaterMeter = nbWaterMeterMapper.getNbWaterMeter(imei);
-		if (cmdFrame ==null || nbWaterMeter == null) {
+		if (cmdFrame == null) {
+			return;
+		}
+		NbWaterMeter nbWaterMeter = nbWaterMeterMapper.getNbWaterMeter(imei);
+		if (nbWaterMeter == null) {
 			return;
 		}
 		JSONObject param = new JSONObject();

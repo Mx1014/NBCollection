@@ -460,7 +460,7 @@ public class Constant {
 	public static final String SUNTRONT_DSID = "3200_0_5505";
 	/** 府星移动平台上报数据项ds_id */
 	public static final String FX_DSID = "3200_0_5750";
-	/** 府星移动平台上报数据项ds_id */
+	/** 科林移动平台上报数据项ds_id */
 	public static final String KE_DSID = "3200_0_5751";
 	
 	public static final String LWM2M = "LWM2M";
@@ -486,6 +486,10 @@ public class Constant {
 	public static final String C0A5 = "C0A5";
 	public static final String C0A6 = "C0A6";
 	public static final String C0A7 = "C0A7";
+	
+	public static final String CONTROL = "control";
+	public static final String IMEI = "imei";
+	public static final String RESULT = "result";
 
 	/** 府星移动平台命令控制码 */
 	/** 设置表端压力告警参数 */
@@ -514,6 +518,7 @@ public class Constant {
 	public static final int NUM_18 = 18;
 	public static final int NUM_130 = 130;
 	public static final int NUM_37 = 37;
+	public static final int NUM_40 = 40;
 
 }
 

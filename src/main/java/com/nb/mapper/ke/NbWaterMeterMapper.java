@@ -8,6 +8,8 @@ import com.nb.model.ke.NbWaterMeter;
 public interface NbWaterMeterMapper {
 
 	NbWaterMeter getNbWaterMeter(String imei);
+	
+	boolean isExistImei(String imei);
 
 	boolean updateNbWaterMeter(NbWaterMeter record);
 

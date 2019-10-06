@@ -29,9 +29,7 @@ import com.nb.model.CmdResult;
 import com.nb.model.DeviceInfo;
 import com.nb.model.ke.NbCommand;
 import com.nb.model.StreamClosedHttpResponse;
-import com.nb.protocolutil.FxProtocolUtil;
 import com.nb.protocolutil.KeProtocolUtil;
-import com.nb.protocolutil.SuntrontProtocolUtil;
 import com.nb.service.IChinaMobileCommandService;
 import com.nb.utils.CommFunc;
 import com.nb.utils.Constant;
@@ -67,6 +65,7 @@ public class ChinaMobileCommandServiceImpl implements IChinaMobileCommandService
 	* @throws Exception 
 	* @see com.nb.service.IChinaMobileCommandService#instantReadDeviceResources(com.alibaba.fastjson.JSONObject)
 	*/
+	@SuppressWarnings("unchecked")
 	@Override
 	public ResultBean<?> offlineReadDeviceResources(JSONObject commandInfo) throws Exception {
 
@@ -106,6 +105,7 @@ public class ChinaMobileCommandServiceImpl implements IChinaMobileCommandService
 	* @throws Exception 
 	* @see com.nb.service.IChinaMobileCommandService#instantWriteDeviceResources(com.alibaba.fastjson.JSONObject) 
 	*/
+	@SuppressWarnings("unchecked")
 	@Override
 	public ResultBean<?> offlineWriteDeviceResources(JSONObject commandInfo) throws Exception {
 
@@ -179,6 +179,7 @@ public class ChinaMobileCommandServiceImpl implements IChinaMobileCommandService
 	* @throws Exception 
 	* @see com.nb.service.IChinaMobileCommandService#asynCommand(com.alibaba.fastjson.JSONObject) 
 	*/
+	@SuppressWarnings("unchecked")
 	@Override
 	public ResultBean<?> asynCommand(JSONObject command) throws Exception {
 		Map<String, String> param = new HashMap<>();
@@ -263,11 +264,11 @@ public class ChinaMobileCommandServiceImpl implements IChinaMobileCommandService
 	* @throws 
 	*/
 	private String getCommandData(DeviceInfo deviceInfo, JSONObject command) throws Exception {
- 		String manufacturerId = deviceInfo.getManufacturerId();
+		String manufacturerId = deviceInfo.getManufacturerId();
 		String control = command.getString("control");
 		String cmdFrame = null;
 		String imei = deviceInfo.getImei();
-		JSONObject param = command.getJSONObject("cmd");
+		JSONObject param = command.getJSONObject("command");
 		/** 科林规约 */
 		if (manufacturerId.equals(Constant.KE_DSID)) {
 			switch (control) {
@@ -279,16 +280,16 @@ public class ChinaMobileCommandServiceImpl implements IChinaMobileCommandService
 				cmdFrame = KeProtocolUtil.make40A3Frame(imei, param);
 				break;
 			case "40A4":
-				cmdFrame = KeProtocolUtil.make40A4Frame(imei,param);
+				cmdFrame = KeProtocolUtil.make40A4Frame(imei, param);
 				break;
 			case "40A5":
-				cmdFrame = KeProtocolUtil.make40A5Frame(imei,param);
+				cmdFrame = KeProtocolUtil.make40A5Frame(imei, param);
 				break;
 			case "40A6":
-				cmdFrame = KeProtocolUtil.make40A6Frame(imei,param);
+				cmdFrame = KeProtocolUtil.make40A6Frame(imei, param);
 				break;
 			case "40A7":
-				cmdFrame = KeProtocolUtil.make40A7Frame(imei,param);
+				cmdFrame = KeProtocolUtil.make40A7Frame(imei, param);
 				break;
 			default:
 				break;
@@ -351,17 +352,15 @@ public class ChinaMobileCommandServiceImpl implements IChinaMobileCommandService
 		urlParams.put("obj_id", commandMap.get("serviceId"));
 		urlParams.put("obj_inst_id", commandMap.get("method"));
 		urlParams.put("res_id", commandMap.get("res_id"));
-		urlParams.put("timeout", 40);
+		urlParams.put("timeout", Constant.NUM_40);
 
-		
 		String url = Constant.CHINA_MOBILE_BASE_URL + "nbiot/execute";
-		
 		HttpsClientUtil httpsClientUtil = new HttpsClientUtil();
 		url = HttpsClientUtil.setCompleteUrl(url, urlParams);
-		
+
 		JSONObject argsJson = new JSONObject();
 		/** 将传过来的命令参数，根据规约转成16进制字符串 */
- 		argsJson.put("args", commandInfo.getString("commandData"));
+		argsJson.put("args", commandInfo.getString("commandData"));
 
 		StreamClosedHttpResponse response = httpsClientUtil.doPostJsonGetStatusLine(url,
 				CommFunc.getChinaMobileHeader(deviceInfo.getAppId()), argsJson.toJSONString());
@@ -376,6 +375,7 @@ public class ChinaMobileCommandServiceImpl implements IChinaMobileCommandService
 	* @throws Exception 
 	* @see com.nb.service.IChinaMobileCommandService#batchCommand(com.alibaba.fastjson.JSONObject) 
 	*/
+	@SuppressWarnings("unchecked")
 	@Override
 	public ResultBean<?> batchCommand(JSONObject commandInfo) throws Exception {
 		LoggerUtil.logger(LogName.INFO).info("接收批量下发命令请求：" + commandInfo);

@@ -37,7 +37,6 @@ import com.nb.exception.ResultBean;
 import com.nb.httputil.HttpsClientUtil;
 import com.nb.model.ke.NbCommand;
 import com.nb.model.SM4;
-import com.nb.protocolutil.SuntrontProtocolUtil;
 import com.nb.task.FxTelecomCallDataTask;
 import com.nb.utils.BytesUtils;
 import com.nb.utils.CommFunc;
@@ -82,9 +81,13 @@ public class MainTest {
 	 */
 	public static void main(String[] args) throws UnsupportedEncodingException, ParseException {
 
+		String imei = "20190930";
+		System.out.println(imei.substring(2));
 		
-		byte a = 2;
-		System.out.println(new StringBuilder("0869029032410846").reverse().toString());
+//		byte a = 2;
+//		System.out.println(new StringBuilder("0869029032410846").reverse().toString());
+//		
+//		System.out.println(toByte(9));
 //        for (int i = 0; i < 12; i++) {
 //            System.out.println(new Random().nextInt(100));
 //		}

@@ -92,7 +92,6 @@ public class SM4Utils {
 			sm4.sm4_setkey_dec(ctx, keyBytes);
 			byte[] decrypted = sm4.sm4_crypt_ecb(ctx, datas);
 			return decrypted;
-//			return new String(decrypted, "GBK");
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
