@@ -61,7 +61,7 @@ public class ScheduleFactory {
 	* @return void    返回类型 
 	* @throws 
 	*/
-	@SuppressWarnings("unlikely-arg-type")
+	@SuppressWarnings({ "unlikely-arg-type", "unchecked" })
 	@Scheduled(fixedRate = 1000 * 60)
 	public void scheduleUpdateCronTrigger() throws Exception {
 		try {
