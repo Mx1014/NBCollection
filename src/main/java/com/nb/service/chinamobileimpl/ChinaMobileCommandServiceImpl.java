@@ -268,13 +268,12 @@ public class ChinaMobileCommandServiceImpl implements IChinaMobileCommandService
 		String control = command.getString("control");
 		String cmdFrame = null;
 		String imei = deviceInfo.getImei();
-		JSONObject param = command.getJSONObject("command");
+		JSONObject param = command.getJSONObject("param");
 		/** 科林规约 */
 		if (manufacturerId.equals(Constant.KE_DSID)) {
 			switch (control) {
 			case "40A2":
-				byte cmd = command.getByteValue("cmd");
-				cmdFrame = KeProtocolUtil.make40A2Frame(imei, cmd);
+				cmdFrame = KeProtocolUtil.make40A2Frame(imei, param);
 				break;
 			case "40A3":
 				cmdFrame = KeProtocolUtil.make40A3Frame(imei, param);

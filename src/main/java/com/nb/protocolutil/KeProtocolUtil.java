@@ -1326,11 +1326,12 @@ public class KeProtocolUtil {
 	* @return String    返回类型 
 	* @throws 
 	*/
-	public static String make40A2Frame(String imei, byte cmd) {
+	public static String make40A2Frame(String imei, JSONObject param) {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(bos);
 		String dataFrame = null;
 		imei = String.format("%016d", toLong(imei));
+		byte cmd = param.getByteValue("cmd");
 		try {
 			/** 起始字符 */
 			dos.writeByte(0x68);
