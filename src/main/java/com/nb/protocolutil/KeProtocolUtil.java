@@ -1605,7 +1605,7 @@ public class KeProtocolUtil {
 	* @return String    返回类型 
 	* @throws 
 	*/
-	public static String make40A6Frame(String imei, JSONObject param) {
+	public static String make40A6Frame(String imei) {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(bos);
 		String dataFrame = null;
@@ -1679,7 +1679,7 @@ public class KeProtocolUtil {
 	* @return String    返回类型 
 	* @throws 
 	*/
-	public static String make40A7Frame(String imei, JSONObject param) {
+	public static String make40A7Frame(String imei) {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(bos);
 		String dataFrame = null;
@@ -1737,70 +1737,66 @@ public class KeProtocolUtil {
 	* @return KeMsg    返回类型 
 	* @throws 
 	*/
-	private static KeMsg verifyDataFrame(byte[] msg) {
+	private static KeMsg verifyDataFrame(byte[] msg) throws Exception {
 		ByteArrayInputStream bais = new ByteArrayInputStream(msg);
 		DataInputStream dis = new DataInputStream(bais);
 		KeMsg keMsg = null;
-		try {
-			/** 起始字符 */
-			byte frameStart = dis.readByte();
-			if (frameStart != Constant.FRAME_START) {
-				return null;
-			}
-
-			/** 规约类型 */
-			byte protocolType = dis.readByte();
-			if (protocolType != Constant.NB_TYPE) {
-				return null;
-			}
-
-			/** 消息属性 */
-			byte msgType = dis.readByte();
-
-			/** imei码 */
-			byte[] imeiBytes = new byte[Constant.EIGHT];
-			dis.read(imeiBytes);
-			String imei = BytesUtils.bcdToString(imeiBytes);
-
-			/** 控制码 */
-			byte[] control = new byte[Constant.TWO];
-			dis.read(control);
-			String ctrlCode = bytesToHex(control);
-
-			/** 数据长度 */
-			byte[] len = new byte[Constant.TWO];
-			dis.read(len);
-			/** 数据 */
-			short dataLength = getReserveShort(len);
-
-			byte[] datas = new byte[dataLength];
-			dis.read(datas);
-			
-			/** 校验字节 */
-			byte[] crc = new byte[Constant.TWO];
-			dis.read(crc);
-
-			/** 获取待验证数据，并计算CRC值 */
-			byte[] crcData = new byte[Constant.TEN + Constant.FIVE + dataLength];
-			System.arraycopy(msg, Constant.ZERO, crcData, Constant.ZERO, crcData.length);
-			String calcCrc = getReserveCrc(crcData);
-
-			/** 验证CRC与计算值 */
-			if (!bytesToHex(crc).equals(calcCrc)) {
-				System.out.println("CRC校验失败 " + bytesToHex(crc) + ":" + calcCrc);
-				return null;
-			}
-
-			/** 结束字符 */
-			byte end = dis.readByte();
-			if (end != Constant.FRAME_END) {
-				return null;
-			}
-
-			keMsg = new KeMsg(msgType, imei, ctrlCode, datas);
-		} catch (Exception e) {
-			e.printStackTrace();
+		/** 起始字符 */
+		byte frameStart = dis.readByte();
+		if (frameStart != Constant.FRAME_START) {
+			return null;
 		}
+
+		/** 规约类型 */
+		byte protocolType = dis.readByte();
+		if (protocolType != Constant.NB_TYPE) {
+			return null;
+		}
+
+		/** 消息属性 */
+		byte msgType = dis.readByte();
+
+		/** imei码 */
+		byte[] imeiBytes = new byte[Constant.EIGHT];
+		dis.read(imeiBytes);
+		String imei = BytesUtils.bcdToString(imeiBytes);
+
+		/** 控制码 */
+		byte[] control = new byte[Constant.TWO];
+		dis.read(control);
+		String ctrlCode = bytesToHex(control);
+
+		/** 数据长度 */
+		byte[] len = new byte[Constant.TWO];
+		dis.read(len);
+		/** 数据 */
+		short dataLength = getReserveShort(len);
+
+		byte[] datas = new byte[dataLength];
+		dis.read(datas);
+
+		/** 校验字节 */
+		byte[] crc = new byte[Constant.TWO];
+		dis.read(crc);
+
+		/** 获取待验证数据，并计算CRC值 */
+		byte[] crcData = new byte[Constant.TEN + Constant.FIVE + dataLength];
+		System.arraycopy(msg, Constant.ZERO, crcData, Constant.ZERO, crcData.length);
+		String calcCrc = getReserveCrc(crcData);
+
+		/** 验证CRC与计算值 */
+		if (!bytesToHex(crc).equals(calcCrc)) {
+			System.out.println("CRC校验失败 " + bytesToHex(crc) + ":" + calcCrc);
+			return null;
+		}
+
+		/** 结束字符 */
+		byte end = dis.readByte();
+		if (end != Constant.FRAME_END) {
+			return null;
+		}
+
+		keMsg = new KeMsg(msgType, imei, ctrlCode, datas);
 		return keMsg;
 	}
 }

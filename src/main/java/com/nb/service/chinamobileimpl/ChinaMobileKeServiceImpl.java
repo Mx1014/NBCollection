@@ -55,7 +55,7 @@ public class ChinaMobileKeServiceImpl implements IChinaMobileService {
 		}
 		
 		String control = resultJson.getString(Constant.CONTROL);
-		String imei = ConverterUtils.toStr(ConverterUtils.toLong(resultJson.getString(Constant.IMEI)));
+		String imei = ConverterUtils.toLong(resultJson.getString(Constant.IMEI)).toString();
 		String cmdFrame = null;
 		switch (control) {
 		case Constant.C0AF:

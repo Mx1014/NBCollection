@@ -37,7 +37,7 @@ import com.nb.utils.DateUtils;
 import com.nb.utils.JedisUtils;
 import com.nb.utils.JsonUtil;
 
-/**
+/**instantCommand
  * @ClassName: ChinaMobileDeviceControllerinstantCommand
  * @Description: 中国移动OneNET命令管理
  * @author dbr
@@ -286,10 +286,10 @@ public class ChinaMobileCommandServiceImpl implements IChinaMobileCommandService
 				cmdFrame = KeProtocolUtil.make40A5Frame(imei, param);
 				break;
 			case "40A6":
-				cmdFrame = KeProtocolUtil.make40A6Frame(imei, param);
+				cmdFrame = KeProtocolUtil.make40A6Frame(imei);
 				break;
 			case "40A7":
-				cmdFrame = KeProtocolUtil.make40A7Frame(imei, param);
+				cmdFrame = KeProtocolUtil.make40A7Frame(imei);
 				break;
 			default:
 				break;

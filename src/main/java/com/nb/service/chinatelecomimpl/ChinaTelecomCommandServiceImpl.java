@@ -61,6 +61,7 @@ public class ChinaTelecomCommandServiceImpl implements IChinaTelecomCommandServi
 	* command{"rtuId":"1","mpId":"1","commandId":"1",operatorId":"1",
 	 * "param":"{\"value\":\"12\"}"
 	*/
+	@SuppressWarnings("unchecked")
 	@Override
 	
 	public ResultBean<?> asynCommand(JSONObject command) throws Exception {
