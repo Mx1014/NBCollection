@@ -44,6 +44,7 @@ public class ChinaTelecomCallBackController {
 	@Resource
 	private NbCommandMapper nbCommandMapper;
 	
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "deviceAdded", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<HttpStatus> recvAddDeviceNotify(@RequestBody Object addDeviceNotifyMessage) {
 
@@ -75,6 +76,7 @@ public class ChinaTelecomCallBackController {
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "deviceDataChanged", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<HttpStatus> recvDataChangeNotify(@RequestBody Object updateDeviceDataNotifyMessage) {
 
@@ -165,6 +167,7 @@ public class ChinaTelecomCallBackController {
 	* commandId=4613a3e9ce9241cc832dafcca193c87f}
 	*/
 	
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "reportCmdExecResult", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<HttpStatus> reportCmdExecResult(@RequestBody Object reportCmdExecResultNotifyMessage){
 

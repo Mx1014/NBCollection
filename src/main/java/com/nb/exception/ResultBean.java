@@ -87,6 +87,7 @@ public class ResultBean<T> implements Serializable{
 	* <p>Description: </p>  
 	*/
 	
+	@SuppressWarnings("unchecked")
 	public ResultBean(String response) {
 		super();
 		JSONObject jsonObj = JSONObject.parseObject(response);
