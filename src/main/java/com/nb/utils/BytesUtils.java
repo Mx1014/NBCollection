@@ -185,6 +185,7 @@ public class BytesUtils {
     * @return T    返回类型 
     * @throws 
     */
+	@SuppressWarnings("unchecked")
 	public static <T> T invertArray(T array) {
 		int len = Array.getLength(array);
 

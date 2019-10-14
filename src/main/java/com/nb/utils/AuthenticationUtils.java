@@ -20,6 +20,7 @@ import com.nb.model.StreamClosedHttpResponse;
  */
 public class AuthenticationUtils {
 	
+	@SuppressWarnings("unchecked")
 	public static String getChinaTelecomAccessToken(ChinaTelecomIotHttpsUtil httpsUtil, String appId, String secret) {
 		String key = Constant.ACCESS_TOKEN + appId;
 		String accessToken = JedisUtils.get(key);
