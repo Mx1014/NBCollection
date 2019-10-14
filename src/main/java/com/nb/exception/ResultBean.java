@@ -98,7 +98,6 @@ public class ResultBean<T> implements Serializable{
 		if (jsonObj.containsKey(Constant.DATA)) {
 			this.data = (T) jsonObj.get("data");
 		}
-		
 	}
 	
 	/** 
