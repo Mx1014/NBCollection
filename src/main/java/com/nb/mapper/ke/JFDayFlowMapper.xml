@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.nb.mapper.JFDayFlowMapper" >
-  <resultMap id="BaseResultMap" type="com.nb.model.JFDayFlow" >
+<mapper namespace="com.nb.mapper.ke.JFDayFlowMapper" >
+  <resultMap id="BaseResultMap" type="com.nb.model.ke.JFDayFlow" >
     <result column="rtu_id" property="rtuId" jdbcType="INTEGER" />
     <result column="mp_id" property="mpId" jdbcType="SMALLINT" />
     <result column="date" property="date" jdbcType="INTEGER" />
@@ -20,7 +20,7 @@
     <result column="source" property="source" jdbcType="TINYINT" />
   </resultMap>
   
-  <update id="updateJFDayFlow" parameterType="com.nb.model.JFDayFlow" >
+  <update id="updateJFDayFlow" parameterType="com.nb.model.ke.JFDayFlow" >
     update  ${tableName}
    <set>
       <if test="time != null" >
@@ -70,7 +70,7 @@
   </update>
   
   
-  <insert id="insertJFDayFlow" parameterType="com.nb.model.JFDayFlow" >
+  <insert id="insertJFDayFlow" parameterType="com.nb.model.ke.JFDayFlow" >
     insert into ${tableName}
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="rtuId != null" >
@@ -176,7 +176,7 @@
   
   
   
-   <select id="isExist" resultType="boolean" parameterType="com.nb.model.JFDayFlow" >
+   <select id="isExist" resultType="boolean" parameterType="com.nb.model.ke.JFDayFlow" >
 	select count('X') from ${tableName}
 	where rtu_id = #{rtuId,jdbcType=INTEGER}
 	and mp_id = #{mpId,jdbcType=SMALLINT}

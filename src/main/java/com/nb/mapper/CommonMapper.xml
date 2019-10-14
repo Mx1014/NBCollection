@@ -83,7 +83,7 @@
 	</update>
 	
 	
-	<update id="updateWaterMeter" parameterType="com.nb.model.NbWaterMeter" >
+	<update id="updateWaterMeter" parameterType="com.nb.model.ke.NbWaterMeter" >
     update nb_water_meter
     <set >
       <if test="appinfoId != null" >

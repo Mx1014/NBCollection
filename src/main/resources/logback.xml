@@ -2,7 +2,7 @@
 <configuration>
     
     <appender name="INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <File>logs/NBWaterMeterCollection/info.log</File>
+        <File>logs/NBCollection/info.log</File>
         <append>true</append>
         <!--过滤器,只打INFO级别的日志-->
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
@@ -11,7 +11,7 @@
             <onMismatch>DENY</onMismatch>
         </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>logs/NBWaterMeterCollection/info.log.%d</fileNamePattern>
+            <fileNamePattern>logs/NBCollection/info.log.%d</fileNamePattern>
             <maxHistory>180</maxHistory>
         </rollingPolicy>
 
@@ -22,7 +22,7 @@
     </appender>
 
     <appender name="ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <File>logs/NBWaterMeterCollection/error.log</File>
+        <File>logs/NBCollection/error.log</File>
         <append>true</append>
         <!--过滤器,只打ERROR级别的日志-->
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
@@ -31,7 +31,7 @@
             <onMismatch>DENY</onMismatch>
         </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>logs/NBWaterMeterCollection/error.log.%d</fileNamePattern>
+            <fileNamePattern>logs/NBCollection/error.log.%d</fileNamePattern>
             <maxHistory>180</maxHistory>
         </rollingPolicy>
 
@@ -43,7 +43,7 @@
 
     <!--不同业务逻辑的日志打印到不同文件-->
     <appender name="CallbackAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <File>logs/NBWaterMeterCollection/callback.log</File>
+        <File>logs/NBCollection/callback.log</File>
         <append>true</append>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>INFO</level>
@@ -51,7 +51,7 @@
 <!--             <onMismatch>DENY</onMismatch> -->
         </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>logs/NBWaterMeterCollection/callback.log.%d</fileNamePattern>
+            <fileNamePattern>logs/NBCollection/callback.log.%d</fileNamePattern>
             <maxHistory>180</maxHistory>
         </rollingPolicy>
         <encoder charset="UTF-8">
@@ -65,7 +65,7 @@
     </logger>
     
     <appender name="HistoryDataAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <File>logs/NBWaterMeterCollection/historyData.log</File>
+        <File>logs/NBCollection/historyData.log</File>
         <append>true</append>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>INFO</level>
@@ -73,7 +73,7 @@
 <!--             <onMismatch>DENY</onMismatch> -->
         </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>logs/NBWaterMeterCollection/historyData.log.%d</fileNamePattern>
+            <fileNamePattern>logs/NBCollection/historyData.log.%d</fileNamePattern>
             <maxHistory>120</maxHistory>
         </rollingPolicy>
         <encoder charset="UTF-8">
