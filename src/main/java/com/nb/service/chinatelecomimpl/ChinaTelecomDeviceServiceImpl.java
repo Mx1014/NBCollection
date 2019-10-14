@@ -51,6 +51,7 @@ public class ChinaTelecomDeviceServiceImpl implements IChinaTelecomDeviceService
 	* @see com.nb.service.IChinaTelecomDeviceService#registerDevice(com.alibaba.fastjson.JSONObject) 
 	* {"rtuId":"1","mpId":"1"}"
 	*/
+	@SuppressWarnings("unchecked")
 	@Override
 	
 	public ResultBean<?> registerDevice(JSONObject deviceMsg) throws Exception {
@@ -175,6 +176,7 @@ public class ChinaTelecomDeviceServiceImpl implements IChinaTelecomDeviceService
 	* @see com.nb.service.IChinaTelecomDeviceService#deleteDevice(com.alibaba.fastjson.JSONObject) 
 	* {"rtuId":"1","mpId":"1"}"
 	*/
+	@SuppressWarnings("unchecked")
 	@Override
 	
 	public ResultBean<?> deleteDevice(JSONObject deviceMsg) throws Exception {

@@ -56,6 +56,7 @@ public class TaskServiceImpl implements ITaskService {
 	* @param className 
 	* @see com.nb.service.ITaskService#callHistoryData(java.lang.String) 
 	*/
+	@SuppressWarnings("unchecked")
 	@Override
 	public void callHistoryData(String className) {
 		/** 根据任务名称获取任务信息 */

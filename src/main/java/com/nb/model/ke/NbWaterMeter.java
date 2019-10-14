@@ -1,7 +1,5 @@
 package com.nb.model.ke;
 
-import java.util.Date;
-
 public class NbWaterMeter extends NbWaterMeterKey {
     private Integer appinfoId;
 

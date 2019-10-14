@@ -1,7 +1,6 @@
 package com.nb.model.ke;
 
 import java.io.Serializable;
-import java.util.Date;
 
 public class NbDailyData implements Serializable {
 	  

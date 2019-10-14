@@ -46,6 +46,7 @@ public class ChinaMobileDeviceServiceImpl implements IChinaMobileDeviceService {
 	* @throws Exception 
 	* @see com.nb.service.IChinaMobileDeviceService#registerDevice(com.alibaba.fastjson.JSONObject) 
 	*/
+	@SuppressWarnings("unchecked")
 	@Override
 	public ResultBean<?> registerDevice(JSONObject deviceMsg) throws Exception {
 
@@ -83,6 +84,7 @@ public class ChinaMobileDeviceServiceImpl implements IChinaMobileDeviceService {
 	* @throws Exception 
 	* @see com.nb.service.IChinaMobileDeviceService#deleteDevice(com.alibaba.fastjson.JSONObject) 
 	*/
+	@SuppressWarnings("unchecked")
 	@Override
 	public ResultBean<?> deleteDevice(JSONObject deviceMsg) throws Exception {
 

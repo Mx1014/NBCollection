@@ -143,6 +143,7 @@ public class ChinaTelecomCommandServiceImpl implements IChinaTelecomCommandServi
 	 * "commandId":"1",operatorId":"1", "serviceId":"ACD",method="CDE" "param":"{\"value\":\"12\"}"
 	*/
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public ResultBean<?> batchCommand(JSONObject commands) throws Exception {
 		LoggerUtil.logger(LogName.INFO).info("接收批量下发命令请求：" + commands);
