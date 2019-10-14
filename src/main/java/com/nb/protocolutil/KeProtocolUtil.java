@@ -156,64 +156,79 @@ public class KeProtocolUtil {
 		JSONObject rtnJson = new JSONObject();
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		DataInputStream dis = new DataInputStream(bais);
+		int dataLength = 0;
 		try {
 			/** 告警上报时间 */
 			byte[] data0 = new byte[Constant.SIX];
 			dis.read(data0);
 			String reportDate = BytesUtils.bcdToString(data0);
-
+			dataLength += data0.length;
 			/** 大流量告警 */
 			byte data1 = dis.readByte();
+			dataLength += Constant.ONE;
 			/** 大流量告警发生值 */
 			byte[] data2 = new byte[Constant.TWO];
 			dis.read(data2);
+			dataLength += data2.length;
 			short largeFlowValue = getShort(data2);
 			/** 大流量告警发生时间 */
 			byte[] data3 = new byte[Constant.SIX];
 			dis.read(data3);
 			String largeFlowDate = BytesUtils.bcdToString(data3);
+			dataLength += data3.length;
 
 			/** 小流量告警 */
 			byte data4 = dis.readByte();
+			dataLength += Constant.ONE;
 			/** 小流量告警发生值 */
 			byte[] data5 = new byte[Constant.TWO];
 			dis.read(data5);
 			double smallFlowValue = toDouble(getShort(data5)) / Constant.TEN;
+			dataLength += data5.length;
 			/** 小流量告警发生时间 */
 			byte[] data6 = new byte[Constant.SIX];
 			dis.read(data6);
 			String smallFlowDate = BytesUtils.bcdToString(data6);
+			dataLength += data6.length;
 
 			/** 反向告警 */
 			byte data7 = dis.readByte();
+			dataLength += Constant.ONE;
 			/** 磁干扰告警 */
 			byte data8 = dis.readByte();
+			dataLength += Constant.ONE;
 			/** 电池低电压告警 */
 			byte data9 = dis.readByte();
+			dataLength += Constant.ONE;
 			/** 电池电压 */
 			byte data10 = dis.readByte();
 			double batteryVoltage = toDouble(data10) / Constant.TEN;
+			dataLength += Constant.ONE;
 
 			/** 数据被篡改 */
 			byte data11 = dis.readByte();
+			dataLength += Constant.ONE;
 			/** 内部错误 */
 			byte data12 = dis.readByte();
+			dataLength += Constant.ONE;
 			/** 远传模块分离 */
 			byte data13 = dis.readByte();
+			dataLength += Constant.ONE;
 			/** 备用字节 */
 			byte[] data14 = new byte[Constant.TEN];
 			dis.read(data14);
-
+			dataLength += data14.length;
 			/** imei码 */
 			byte[] imeiBytes = new byte[Constant.EIGHT];
 			dis.read(imeiBytes);
 			String imeiCode = BytesUtils.bcdToString(imeiBytes);
+			dataLength += imeiBytes.length;
 			/** 校验字节 */
 			byte[] crc = new byte[Constant.TWO];
 			dis.read(crc);
 
 			/** 获取待验证数据，并计算CRC值 */
-			byte[] crcData = new byte[Constant.NUM_49];
+			byte[] crcData = new byte[dataLength];
 			System.arraycopy(data, Constant.ZERO, crcData, Constant.ZERO, crcData.length);
 			String calcCrc = getReserveCrc(crcData);
 
@@ -318,29 +333,31 @@ public class KeProtocolUtil {
 
 		JSONObject rtnJson = new JSONObject();
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
-		DataInputStream dis = new DataInputStream(bais);
+		DataInputStream dis = new DataInputStream(bais); 
+		int dataLength = 0;
 		try {
 			/** mid */
 			byte[] data0 = new byte[Constant.TWO];
 			dis.read(data0);
- 
+			dataLength += data0.length;
 			/** 执行结果 */
 			byte data1 = dis.readByte();
-			
+			dataLength += Constant.ONE;
 			/** 备用字节 */
 			byte[] data2 = new byte[Constant.NINE];
 			dis.read(data2);
-
+			dataLength += data2.length;
 			/** imei码 */
 			byte[] imeiBytes = new byte[Constant.EIGHT];
 			dis.read(imeiBytes);
 			String imeiCode = BytesUtils.bcdToString(imeiBytes);
+			dataLength += imeiBytes.length;
 			/** 校验字节 */
 			byte[] crc = new byte[Constant.TWO];
 			dis.read(crc);
 
 			/** 获取待验证数据，并计算CRC值 */
-			byte[] crcData = new byte[Constant.NUM_18];
+			byte[] crcData = new byte[dataLength];
 			System.arraycopy(data, Constant.ZERO, crcData, Constant.ZERO, crcData.length);
 			String calcCrc = getReserveCrc(crcData);
 
@@ -385,28 +402,30 @@ public class KeProtocolUtil {
 		JSONObject rtnJson = new JSONObject();
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		DataInputStream dis = new DataInputStream(bais);
+		int dataLength = 0;
 		try {
 			/** mid */
 			byte[] data0 = new byte[Constant.TWO];
 			dis.read(data0);
- 
+			dataLength += data0.length;
 			/** 执行结果 */
 			byte data1 = dis.readByte();
-			
+			dataLength += Constant.ONE;
 			/** 备用字节 */
 			byte[] data2 = new byte[Constant.NINE];
 			dis.read(data2);
-
+			dataLength += data2.length;
 			/** imei码 */
 			byte[] imeiBytes = new byte[Constant.EIGHT];
 			dis.read(imeiBytes);
 			String imeiCode = BytesUtils.bcdToString(imeiBytes);
+			dataLength += imeiBytes.length;
 			/** 校验字节 */
 			byte[] crc = new byte[Constant.TWO];
 			dis.read(crc);
 
 			/** 获取待验证数据，并计算CRC值 */
-			byte[] crcData = new byte[Constant.NUM_18];
+			byte[] crcData = new byte[dataLength];
 			System.arraycopy(data, Constant.ZERO, crcData, Constant.ZERO, crcData.length);
 			String calcCrc = getReserveCrc(crcData);
 
@@ -451,33 +470,36 @@ public class KeProtocolUtil {
 		JSONObject rtnJson = new JSONObject();
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		DataInputStream dis = new DataInputStream(bais);
+		int dataLength = 0;
 		try {
 			/** mid */
 			byte[] data0 = new byte[Constant.TWO];
 			dis.read(data0);
- 
+			dataLength += data0.length;
 			/** 执行结果 */
 			byte data1 = dis.readByte();
-			
+			dataLength += Constant.ONE;
 			/** 备用字节 */
 			byte[] data2 = new byte[Constant.NINE];
 			dis.read(data2);
-
+			dataLength += data2.length;
 			/** imei码 */
 			byte[] imeiBytes = new byte[Constant.EIGHT];
 			dis.read(imeiBytes);
 			String imeiCode = BytesUtils.bcdToString(imeiBytes);
+			dataLength += imeiBytes.length;
 			/** 数据点数 */
 			byte data4 = dis.readByte();
+			dataLength += Constant.ONE;
 			byte[] data5 = new byte[Constant.NUM_130 * data4];
 			dis.read(data5);
-			
+			dataLength += data5.length;
 			/** 校验字节 */
 			byte[] crc = new byte[Constant.TWO];
 			dis.read(crc);
 
 			/** 获取待验证数据，并计算CRC值 */
-			byte[] crcData = new byte[Constant.NUM_18];
+			byte[] crcData = new byte[dataLength];
 			System.arraycopy(data, Constant.ZERO, crcData, Constant.ZERO, crcData.length);
 			String calcCrc = getReserveCrc(crcData);
 
@@ -595,28 +617,30 @@ public class KeProtocolUtil {
 		JSONObject rtnJson = new JSONObject();
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		DataInputStream dis = new DataInputStream(bais);
+		int dataLength = 0;
 		try {
 			/** mid */
 			byte[] data0 = new byte[Constant.TWO];
 			dis.read(data0);
- 
+			dataLength += data0.length;
 			/** 执行结果 */
 			byte data1 = dis.readByte();
-			
+			dataLength += Constant.ONE;
 			/** 备用字节 */
 			byte[] data2 = new byte[Constant.NINE];
 			dis.read(data2);
-
+			dataLength += data2.length;
 			/** imei码 */
 			byte[] imeiBytes = new byte[Constant.EIGHT];
 			dis.read(imeiBytes);
 			String imeiCode = BytesUtils.bcdToString(imeiBytes);
+			dataLength += imeiBytes.length;
 			/** 校验字节 */
 			byte[] crc = new byte[Constant.TWO];
 			dis.read(crc);
 
 			/** 获取待验证数据，并计算CRC值 */
-			byte[] crcData = new byte[Constant.NUM_18];
+			byte[] crcData = new byte[dataLength];
 			System.arraycopy(data, Constant.ZERO, crcData, Constant.ZERO, crcData.length);
 			String calcCrc = getReserveCrc(crcData);
 
@@ -660,34 +684,37 @@ public class KeProtocolUtil {
 		JSONObject rtnJson = new JSONObject();
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		DataInputStream dis = new DataInputStream(bais);
+		int dataLength = 0;
 		try {
 			/** mid */
 			byte[] data0 = new byte[Constant.TWO];
 			dis.read(data0);
+			dataLength += data0.length;
 			/** 密钥 */
 			byte[] data1 = new byte[Constant.NUM_16];
 			dis.read(data1);
-
+			dataLength += data1.length;
 			/** 母钥版本 */
 			byte data2 = dis.readByte();
- 
+			dataLength += Constant.ONE;
 			/** 执行结果 */
 			byte data3 = dis.readByte();
-			
+			dataLength += Constant.ONE;
 			/** 备用字节 */
 			byte[] data4 = new byte[Constant.NINE];
 			dis.read(data4);
-
+			dataLength += data4.length;
 			/** imei码 */
 			byte[] imeiBytes = new byte[Constant.EIGHT];
 			dis.read(imeiBytes);
 			String imeiCode = BytesUtils.bcdToString(imeiBytes);
+			dataLength += imeiBytes.length;
 			/** 校验字节 */
 			byte[] crc = new byte[Constant.TWO];
 			dis.read(crc);
 
 			/** 获取待验证数据，并计算CRC值 */
-			byte[] crcData = new byte[Constant.NUM_37];
+			byte[] crcData = new byte[dataLength];
 			System.arraycopy(data, Constant.ZERO, crcData, Constant.ZERO, crcData.length);
 			String calcCrc = getReserveCrc(crcData);
 
@@ -732,28 +759,32 @@ public class KeProtocolUtil {
 		JSONObject rtnJson = new JSONObject();
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		DataInputStream dis = new DataInputStream(bais);
+		int dataLength = 0;
 		try {
 			/** mid */
 			byte[] data0 = new byte[Constant.TWO];
 			dis.read(data0);
-
+			dataLength += data0.length;
 			/** 母钥版本 */
 			byte data1 = dis.readByte();
- 
+			dataLength += Constant.ONE;
 			/** 备用字节 */
-			byte[] data4 = new byte[Constant.NINE];
-			dis.read(data4);
+			byte[] data2 = new byte[Constant.NINE];
+			dis.read(data2);
+			dataLength += data2.length;
 
 			/** imei码 */
 			byte[] imeiBytes = new byte[Constant.EIGHT];
 			dis.read(imeiBytes);
 			String imeiCode = BytesUtils.bcdToString(imeiBytes);
+			dataLength += imeiBytes.length;
+
 			/** 校验字节 */
 			byte[] crc = new byte[Constant.TWO];
 			dis.read(crc);
 
 			/** 获取待验证数据，并计算CRC值 */
-			byte[] crcData = new byte[Constant.NUM_37];
+			byte[] crcData = new byte[dataLength];
 			System.arraycopy(data, Constant.ZERO, crcData, Constant.ZERO, crcData.length);
 			String calcCrc = getReserveCrc(crcData);
 
@@ -802,96 +833,130 @@ public class KeProtocolUtil {
 		JSONObject rtnJson = new JSONObject();
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		DataInputStream dis = new DataInputStream(bais);
+		int dataLength = 0;
 		try {
 			/** 日冻结时间 */
 			byte[] data0 = new byte[Constant.SIX];
 			dis.read(data0);
 			String freezeDate = BytesUtils.bcdToString(data0);
+			dataLength += data0.length;
 			/** 日冻结表底 */
 			byte[] data1 = new byte[Constant.FOUR];
 			dis.read(data1);
 			double totalFlow = toDouble(getInt(invertArray(data1))) / Constant.NUM_1000;
+			dataLength += data1.length;
 			/** 当前正向累计流量 */
 			byte[] data2 = new byte[Constant.FOUR];
 			dis.read(data2);
 			double positivetotalFlow = toDouble(getInt(invertArray(data2))) / Constant.NUM_1000;
+			dataLength += data2.length;
+
 			/** 当前反向累计流量 */
 			byte[] data3 = new byte[Constant.FOUR];
 			dis.read(data3);
 			double negativeTotalFlow = toDouble(getInt(invertArray(data3))) / Constant.NUM_1000;
+			dataLength += data3.length; 
+
 			/** 冻结前一日正向累计流量 */
 			byte[] data4 = new byte[Constant.FOUR];
 			dis.read(data4);
 			double dailyPositiveFlow = toDouble(getInt(invertArray(data4))) / Constant.NUM_1000;
+			dataLength += data4.length; 
 			/** 冻结前一日反向累计流量 */
 			byte[] data5 = new byte[Constant.FOUR];
 			dis.read(data5);
 			double dailyNegativeFlow = toDouble(getInt(invertArray(data5)))/ Constant.NUM_1000;
+			dataLength += data5.length; 
 			/** 冻结前一日瞬时量 */
 			byte[] data6 = new byte[Constant.NUM_96];
 			dis.read(data6);
+			dataLength += data6.length; 
 			/** 备用字节 */
 			byte[] data7 = new byte[Constant.TEN];
 			dis.read(data7);
+			dataLength += data7.length; 
 			/** 水表时钟 SSMMHHDDMMYY */
 			byte[] data8 = new byte[Constant.SIX];
 			dis.read(data8);
+			dataLength += data8.length; 
 			/** 电池电压 */
 			byte data9 = dis.readByte();
  			double batteryVoltage = toDouble(data9) / Constant.TEN;
+ 			dataLength += Constant.ONE;
 			/** 版本号 */
 			byte[] data10 = new byte[Constant.FIVE];
 			dis.read(data10);
 			String version = hexToAscii(bytesToHex(data10));
+			dataLength += data10.length; 
 			/** 阀门状态 */
 			byte valveStatus = dis.readByte();
+			dataLength += Constant.ONE;
 			/** 前一日最大流速 */
 			byte[] data12 = new byte[Constant.TWO];
 			dis.read(data12);
 			double dailyMaxVelocity = toDouble(getShort(invertArray(data12))) / Constant.NUM_1000;
+			dataLength += data12.length; 
 			/** 前一日最大流速发生时间 */
 			byte[] data13 = new byte[Constant.SIX];
 			dis.read(data13);
 			String dailyMaxVelocityTime = BytesUtils.bcdToString(data13);
+			dataLength += data13.length; 
+
 			/** 上报基准时间 */
 			byte[] data14 = new byte[Constant.SIX];
 			dis.read(data14);
 			String reportBaseTime = BytesUtils.bcdToString(data14);
+			dataLength += data14.length; 
+
 			/** 上报时间间隔 0-25 单位小时 */
 			byte data15 = dis.readByte();
+			dataLength += Constant.ONE;
 			/** 大流量告警阀值 */
 			byte[] data16 = new byte[Constant.TWO];
 			dis.read(data16);
 			short largeFlowAlarmThreshold = getShort(invertArray(data16));
+			dataLength += data16.length; 
 			/** 大流量告警持续时间 */
 			byte largeFlowAlarmThresholdTime = dis.readByte();
+			dataLength += Constant.ONE;
 			/** 小流量告警阀值 */
 			byte[] data18 = new byte[Constant.TWO];
 			dis.read(data18);
 			double smallFlowAlarmThreshold = toDouble(getShort(invertArray(data18))) / Constant.TEN;
+			dataLength += data18.length; 
+
 			/** 小流量告警持续时间 */
 			byte smallFlowAlarmThresholdTime = dis.readByte();
+			dataLength += Constant.ONE;
 			/** 长时间用水阀值 */
 			byte longTimeUseWaterThresholdTime = dis.readByte();
+			dataLength += Constant.ONE;
 			/** 电池低电压告警阀值 */
 			byte data21 = dis.readByte();
  			double lowVoltageAlarmThreshold = toDouble(data21) / Constant.TEN;
+			dataLength += Constant.ONE;
 			/** 高压告警阀值 */
 			byte data22 = dis.readByte();
+			dataLength += Constant.ONE;
 			/** 低压告警阀值 */
 			byte data23 = dis.readByte();
+			dataLength += Constant.ONE;
 			/** 备用字节 */
 			byte[] data24 = new byte[Constant.TEN];
 			dis.read(data24);
+			dataLength += data24.length;
+
 			/** imei码 */
 			byte[] imeiBytes = new byte[Constant.EIGHT];
 			dis.read(imeiBytes);
 			String imeiCode = BytesUtils.bcdToString(imeiBytes);
+			dataLength += imeiBytes.length;
+
 			/** 校验字节 */
 			byte[] crc = new byte[Constant.TWO];
 			dis.read(crc);
 			/** 获取待验证数据，并计算CRC值 */
-			byte[] crcData = new byte[Constant.NUM_188];
+			byte[] crcData = new byte[dataLength];
 			System.arraycopy(data, Constant.ZERO, crcData, Constant.ZERO, crcData.length);
 			String calcCrc = getReserveCrc(crcData);
 			/** 验证CRC与计算值 */

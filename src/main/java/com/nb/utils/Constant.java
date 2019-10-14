@@ -519,6 +519,8 @@ public class Constant {
 	public static final int NUM_130 = 130;
 	public static final int NUM_37 = 37;
 	public static final int NUM_40 = 40;
+	public static final int NUM_21 = 21;
+	public static final int NUM_26 = 26;
 
 }
 

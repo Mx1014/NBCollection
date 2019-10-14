@@ -23,6 +23,8 @@ import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.FileImageOutputStream;
 import org.springframework.core.io.ClassPathResource;
 import com.alibaba.fastjson.JSONObject;
+import com.nb.logger.LogName;
+import com.nb.logger.LoggerUtil;
 import com.nb.model.ke.KeMsg;
 
 /**
@@ -321,6 +323,9 @@ public class CommFunc {
 	public static byte[] decryptDataECB(KeMsg keMsg) {
 		String imei = String.format("%016d", toLong(keMsg.getImei()));
 		String secretKey = JedisUtils.get(imei);
+		if(null == secretKey) {
+			return null;
+		}
 		SM4Utils sm4 = new SM4Utils();
 		sm4.secretKey = secretKey;
 		sm4.hexString = false;
@@ -330,7 +335,8 @@ public class CommFunc {
 			byte[] data = sm4.decryptDataECB(keMsg.getData());
 			return data;
 		} catch (Exception e) {
-			// TODO: handle exception
+			e.printStackTrace();
+			LoggerUtil.logger(LogName.ERROR).error("报文机密异常,数据内容："+keMsg.toString());
 		}
 		return null;
 	}

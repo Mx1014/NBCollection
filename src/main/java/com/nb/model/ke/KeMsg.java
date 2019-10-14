@@ -9,6 +9,7 @@
 package com.nb.model.ke;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 /** 
 * @ClassName: KeMsg 
@@ -169,5 +170,17 @@ public class KeMsg implements Serializable{
 	 */
 	public void setMid(Integer mid) {
 		this.mid = mid;
+	}
+	/** (非 Javadoc) 
+	* <p>Title: toString</p> 
+	* <p>Description: </p> 
+	* @return 
+	* @see java.lang.Object#toString() 
+	*/
+	@Override
+	public String toString() {
+		return "KeMsg [frameStart=" + frameStart + ", protocolType=" + protocolType + ", msgType=" + msgType + ", imei="
+				+ imei + ", ctrlCode=" + ctrlCode + ", dataLength=" + dataLength + ", data=" + Arrays.toString(data)
+				+ ", cs=" + cs + ", frameEnd=" + frameEnd + ", mid=" + mid + "]";
 	}
 }
