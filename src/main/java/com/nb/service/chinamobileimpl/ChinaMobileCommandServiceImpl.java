@@ -190,7 +190,7 @@ public class ChinaMobileCommandServiceImpl implements IChinaMobileCommandService
 			return new ResultBean<JSONObject>(Constant.ERROR, "配置信息错误");
 		}
 		
-		/** 获取设备信息 */
+		/** 获取命令信息 */
 		Map<String, String> commandMap = commonMapper.getCommand(param);
 		if (null == commandMap || commandMap.isEmpty()) {
 			return new ResultBean<JSONObject>(Constant.ERROR, "命令类型不存在");

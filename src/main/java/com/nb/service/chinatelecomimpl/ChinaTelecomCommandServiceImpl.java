@@ -63,7 +63,6 @@ public class ChinaTelecomCommandServiceImpl implements IChinaTelecomCommandServi
 	*/
 	@SuppressWarnings("unchecked")
 	@Override
-	
 	public ResultBean<?> asynCommand(JSONObject command) throws Exception {
 		
 		LoggerUtil.logger(LogName.INFO).info("接收下发命令请求：" + command);
